@@ -5,7 +5,8 @@ on:
   push:
     branches:
       - main
-
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,3 +35,11 @@ jobs:
         with:
           name: Setlist-Music-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+                - name: Publicar APK en Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ github.run_number }}" \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            --title "Setlist Music APK v${{ github.run_number }}" \
+            --notes "APK generado automáticamente por GitHub Actions."
