@@ -1,4 +1,3 @@
-```yaml
 name: Build Setlist Music APK
 
 on:
@@ -47,4 +46,3 @@ jobs:
             android/app/build/outputs/apk/debug/app-debug.apk \
             --title "Setlist Music APK v${{ github.run_number }}" \
             --notes "APK generado automáticamente por GitHub Actions."
-```
