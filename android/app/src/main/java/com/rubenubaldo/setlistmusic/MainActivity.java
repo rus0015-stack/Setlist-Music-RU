@@ -1,4 +1,3 @@
-
 package com.rubenubaldo.setlistmusic;
 
 import android.app.Activity;
@@ -39,14 +38,12 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
 
         webView.setWebChromeClient(new WebChromeClient() {
-
             @Override
             public boolean onShowFileChooser(
                     WebView webView,
                     ValueCallback<Uri[]> filePathCallback,
                     FileChooserParams fileChooserParams) {
 
-                // Cancelar cualquier selector anterior
                 if (MainActivity.this.filePathCallback != null) {
                     MainActivity.this.filePathCallback.onReceiveValue(null);
                 }
@@ -94,10 +91,9 @@ public class MainActivity extends Activity {
                     results = new Uri[count];
 
                     for (int i = 0; i < count; i++) {
-                        results[i] =
-                                data.getClipData()
-                                        .getItemAt(i)
-                                        .getUri();
+                        results[i] = data.getClipData()
+                                .getItemAt(i)
+                                .getUri();
                     }
 
                 } else if (data.getData() != null) {
@@ -123,7 +119,5 @@ public class MainActivity extends Activity {
             super.onBackPressed();
         }
     }
-}
-```java
 }
 
