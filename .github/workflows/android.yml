@@ -17,32 +17,32 @@ jobs:
       - name: Descargar proyecto
         uses: actions/checkout@v4
 
-      - name: Configurar Java
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
+      - name: Dar permisos al Gradle Wrapper
+        working-directory: android
+        run: chmod +x gradlew
 
       - name: Compilar APK
         working-directory: android
-        run: gradle assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
 
-      - name: Guardar APK
+      - name: Guardar APK como Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Setlist-Music-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
 
       - name: Publicar APK en Releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "v${{ github.run_number }}" \
+          gh release create "v4.3.${{ github.run_number }}" \
             android/app/build/outputs/apk/debug/app-debug.apk \
-            --title "Setlist Music APK v${{ github.run_number }}" \
+            --title "Setlist Music v4.3.${{ github.run_number }}" \
             --notes "APK generado automáticamente por GitHub Actions."
