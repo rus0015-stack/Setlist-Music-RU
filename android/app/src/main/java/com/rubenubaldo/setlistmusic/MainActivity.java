@@ -1,4 +1,4 @@
-```java
+
 package com.rubenubaldo.setlistmusic;
 
 import android.app.Activity;
@@ -124,5 +124,6 @@ public class MainActivity extends Activity {
         }
     }
 }
-```
+```java
+}
 
