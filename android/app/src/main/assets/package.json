@@ -1,0 +1,20 @@
+{
+  "name": "setlist-music",
+  "version": "4.3.0",
+  "private": true,
+  "description": "Setlist Music — aplicación musical de Rubén Ubaldo",
+  "scripts": {
+    "web": "echo Web app in root",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "android:open": "cap open android",
+    "android:build": "cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  }
+}

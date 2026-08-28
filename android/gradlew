@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+GRADLE_VERSION=8.7
+DIST_DIR="${GRADLE_USER_HOME:-$HOME/.gradle}/wrapper/dists/setlist-gradle-$GRADLE_VERSION"
+GRADLE_HOME="$DIST_DIR/gradle-$GRADLE_VERSION"
+if [ ! -x "$GRADLE_HOME/bin/gradle" ]; then
+  mkdir -p "$DIST_DIR"
+  ZIP="$DIST_DIR/gradle-$GRADLE_VERSION-bin.zip"
+  if [ ! -f "$ZIP" ]; then
+    echo "Downloading Gradle $GRADLE_VERSION..."
+    curl -fL --retry 3 -o "$ZIP" "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
+  fi
+  rm -rf "$GRADLE_HOME" "$DIST_DIR/gradle-$GRADLE_VERSION"
+  unzip -q "$ZIP" -d "$DIST_DIR"
+fi
+exec "$GRADLE_HOME/bin/gradle" "$@"
