@@ -347,7 +347,89 @@ async function getAudio(id){const d=await db();return new Promise((res,rej)=>{co
 async function delAudio(id){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
 async function mostrarSecuencias(){const q=(document.getElementById("buscarSecuencia").value||"").toLowerCase(),l=document.getElementById("listaSecuencias");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>🎧 ${esc(c.titulo)}</h3><div class="small">${c.audioName?"Audio: "+esc(c.audioName):"Sin secuencia"} ${c.duracion?"• "+formatTime(c.duracion):""}</div><div class="row"><button class="fit" onclick="subirAudio(${i})">📎 ${c.audioName?"Cambiar":"Subir"} audio</button>${c.audioName?`<button class="fit green" onclick="reproducirAudio(${i})">▶ Reproducir</button><button class="fit red" onclick="eliminarAudio(${i})">🗑</button>`:""}</div></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">🎧 No hay canciones.</div>'}
 async function subirAudio(i){const input=document.createElement("input");input.type="file";input.accept="audio/*";input.onchange=async()=>{const f=input.files[0];if(!f)return;const c=canciones[i];asegurarId(c);await putAudio(c.id,f);c.audioName=f.name;guardarDatos();toast("✓ Secuencia guardada");mostrarSecuencias()};input.click()}
-async function reproducirAudio(i){const c=canciones[i];const b=await getAudio(c.id);if(!b){alert("No se encontró el audio.");return}const url=URL.createObjectURL(b);const a=new Audio(url);a.controls=true;a.style.position="fixed";a.style.left="10px";a.style.right="10px";a.style.bottom="10px";a.style.zIndex=9998;document.body.appendChild(a);a.play();a.onended=()=>{URL.revokeObjectURL(url);a.remove()}}
+let audioActivo = null;
+let audioActivoUrl = null;
+
+async function reproducirAudio(i){
+  const c = canciones[i];
+
+  if(!c?.id){
+    alert("No se encontró la canción.");
+    return;
+  }
+
+  const b = await getAudio(c.id);
+
+  if(!b){
+    alert("No se encontró el audio.");
+    return;
+  }
+
+  detenerAudioActivo();
+
+  const url = URL.createObjectURL(b);
+  const a = new Audio(url);
+
+  audioActivo = a;
+  audioActivoUrl = url;
+
+  a.controls = true;
+  a.preload = "auto";
+
+  a.style.position = "fixed";
+  a.style.left = "10px";
+  a.style.right = "10px";
+  a.style.bottom = "10px";
+  a.style.width = "calc(100% - 20px)";
+  a.style.zIndex = "9998";
+
+  document.body.appendChild(a);
+
+  a.onended = () => {
+    limpiarAudioActivo();
+  };
+
+  a.onerror = () => {
+    limpiarAudioActivo();
+    alert("No se pudo reproducir el audio.");
+  };
+
+  try{
+    await a.play();
+  }catch(e){
+    console.error(e);
+    alert("Pulsa reproducir para iniciar el audio.");
+  }
+}
+
+function detenerAudioActivo(){
+  if(audioActivo){
+    audioActivo.pause();
+    audioActivo.currentTime = 0;
+    audioActivo.remove();
+  }
+
+  if(audioActivoUrl){
+    URL.revokeObjectURL(audioActivoUrl);
+  }
+
+  audioActivo = null;
+  audioActivoUrl = null;
+}
+
+function limpiarAudioActivo(){
+  if(audioActivo){
+    audioActivo.pause();
+    audioActivo.remove();
+  }
+
+  if(audioActivoUrl){
+    URL.revokeObjectURL(audioActivoUrl);
+  }
+
+  audioActivo = null;
+  audioActivoUrl = null;
+}
 async function eliminarAudio(i){const c=canciones[i];if(confirm("¿Eliminar la secuencia?")){await delAudio(c.id);delete c.audioName;delete c.duracion;guardarDatos();mostrarSecuencias()}}
 
 function mostrarReferencias(){const q=(document.getElementById("buscarReferencia").value||"").toLowerCase(),l=document.getElementById("listaReferencias");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);const refs=c.referencias||[];l.innerHTML+=`<div class="card"><h3>🔗 ${esc(c.titulo)}</h3>${refs.length?refs.map((r,j)=>`<div class="ref"><b>${esc(r.nombre||"Referencia")}</b><br><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a><br><button class="red" onclick="eliminarReferencia(${i},${j})">Eliminar</button></div>`).join(""):"<p class='small'>Sin referencias</p>"}<button onclick="editarReferencia(${i})">＋ Agregar referencia</button></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">🔗 No hay canciones.</div>'}
@@ -393,7 +475,16 @@ function cancionSiguiente(){
   tocarPorId(setlist[p+1]);
 }
 
-function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();inicio()}
+function cerrarTocar(){
+  tonalidadTemporal=null;
+  indiceActual=-1;
+
+  detenerAudioActivo();
+
+  document.getElementById("liveAudio")?.remove();
+  cerrarPDF();
+  inicio();
+}
 
 function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
 function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
