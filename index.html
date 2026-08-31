@@ -132,9 +132,19 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="secuencias" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>🎧 Secuencia</h2>
-  <p class="small">Asocia un audio a una canción. Los audios se guardan en IndexedDB del navegador, evitando llenar localStorage.</p>
-  <input id="buscarSecuencia" placeholder="🔎 Buscar canción..." oninput="mostrarSecuencias()"><div id="listaSecuencias"></div>
+  <button class="secondary" onclick="inicio()">← Inicio</button>
+
+  <h2>🎧 Secuencias</h2>
+
+  <p class="small">
+    Accede a tus secuencias musicales almacenadas en Google Drive.
+  </p>
+
+  <button
+    class="primary"
+    onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">
+    🎵 Abrir mis secuencias
+  </button>
 </section>
 
 <section id="referencias" class="hidden">
