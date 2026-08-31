@@ -54,7 +54,10 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
     <button onclick="abrir('canciones')">🎵 CANCIONES<small>Acordes, estructura, tonalidad y edición</small></button>
     <button onclick="abrir('letras')">📝 LETRAS<small>Letra de cada canción y lectura en vivo</small></button>
     <button onclick="abrir('charts')">📄 CHARTS<small>Guardar y visualizar PDFs</small></button>
-    <button onclick="abrir('secuencias')">🎧 SECUENCIA<small>Audio de acompañamiento, tempo y controles</small></button>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">
+  🎧 SECUENCIA
+  <small>Abre tus secuencias musicales en Google Drive</small>
+</button>
     <button onclick="abrir('referencias')">🔗 REFERENCIA<small>Links de YouTube, Spotify, Drive u otras fuentes</small></button>
     <button onclick="abrir('ajustes')">⚙️ DATOS / COPIA<small>Exportar, importar y recuperar tu biblioteca</small></button>
       </div>
@@ -171,7 +174,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
     <button onclick="mostrarVistaTocar('cancion')">🎵 Canción</button>
     <button onclick="mostrarVistaTocar('letra')">📝 Letra</button>
     <button onclick="mostrarVistaTocar('chart')">📄 Chart</button>
-    <button onclick="mostrarVistaTocar('secuencia')">🎧 Sec.</button>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">🎧 Sec.</button>
     <button onclick="mostrarVistaTocar('referencia')">🔗 Ref.</button>
     <button onclick="abrirEditorDesdeTocar()">✏ Editar</button>
   </div>
@@ -360,7 +363,12 @@ function db(){return new Promise((res,rej)=>{const r=indexedDB.open(DBNAME,1);r.
 async function putAudio(id,blob){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,"readwrite");tx.objectStore(STORE).put(blob,id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
 async function getAudio(id){const d=await db();return new Promise((res,rej)=>{const r=d.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 async function delAudio(id){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
-async function mostrarSecuencias(){const q=(document.getElementById("buscarSecuencia").value||"").toLowerCase(),l=document.getElementById("listaSecuencias");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>🎧 ${esc(c.titulo)}</h3><div class="small">${c.audioName?"Audio: "+esc(c.audioName):"Sin secuencia"} ${c.duracion?"• "+formatTime(c.duracion):""}</div><div class="row"><button class="fit" onclick="subirAudio(${i})">📎 ${c.audioName?"Cambiar":"Subir"} audio</button>${c.audioName?`<button class="fit green" onclick="reproducirAudio(${i})">▶ Reproducir</button><button class="fit red" onclick="eliminarAudio(${i})">🗑</button>`:""}</div></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">🎧 No hay canciones.</div>'}
+function mostrarSecuencias(){
+    window.open(
+        'https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u',
+        '_blank'
+    );
+}
 async function subirAudio(i){const input=document.createElement("input");input.type="file";input.accept="audio/*";input.onchange=async()=>{const f=input.files[0];if(!f)return;const c=canciones[i];asegurarId(c);await putAudio(c.id,f);c.audioName=f.name;guardarDatos();toast("✓ Secuencia guardada");mostrarSecuencias()};input.click()}
 async function reproducirAudio(i){const c=canciones[i];const b=await getAudio(c.id);if(!b){alert("No se encontró el audio.");return}const url=URL.createObjectURL(b);const a=new Audio(url);a.controls=true;a.style.position="fixed";a.style.left="10px";a.style.right="10px";a.style.bottom="10px";a.style.zIndex=9998;document.body.appendChild(a);a.play();a.onended=()=>{URL.revokeObjectURL(url);a.remove()}}
 async function eliminarAudio(i){const c=canciones[i];if(confirm("¿Eliminar la secuencia?")){await delAudio(c.id);delete c.audioName;delete c.duracion;guardarDatos();mostrarSecuencias()}}
