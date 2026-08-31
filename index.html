@@ -28,7 +28,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
 .live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{min-height:46px;height:46px;margin:0;padding:8px;font-size:16px}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
 #visorPDF{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column}.pdfbar{background:var(--panel);padding:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.pdfbar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pdfbar button{flex:0 0 auto}#pdfFrame{flex:1;width:100%;border:0;background:white}#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:11px 15px;border-radius:12px;z-index:10000;display:none;box-shadow:var(--shadow)}
-@media(max-width:700px){header{padding-right:150px}.theme-control{right:10px}.menu{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px}}
+@media(max-width:700px){header{padding-right:150px}.theme-control{right:10px;top:30px}.menu{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px}}
 </style>
 </head>
 <body>
@@ -57,8 +57,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
     <button onclick="abrir('secuencias')">🎧 SECUENCIA<small>Audio de acompañamiento, tempo y controles</small></button>
     <button onclick="abrir('referencias')">🔗 REFERENCIA<small>Links de YouTube, Spotify, Drive u otras fuentes</small></button>
     <button onclick="abrir('ajustes')">⚙️ DATOS / COPIA<small>Exportar, importar y recuperar tu biblioteca</small></button>
-    <button onclick="abrir('ayuda')">❓ AYUDA<small>Cómo utilizar la aplicación</small></button>
-  </div>
+      </div>
 </section>
 
 <section id="setlist" class="hidden">
@@ -179,16 +178,6 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
     <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importarDatos(this)">
   </div>
   <div class="card"><h3>🧹 Restauración</h3><button class="red" onclick="borrarBiblioteca()">Borrar canciones y setlist</button></div>
-</section>
-
-<section id="ayuda" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>❓ Ayuda</h2>
-  <div class="card">
-    <h3>Flujo recomendado</h3>
-    <p>1. Crea las canciones → 2. Añade letra/chart/secuencia/referencia → 3. Agrégalas al SETLIST → 4. En vivo pulsa ▶ Tocar.</p>
-    <p>En modo Tocar, <b>−½</b> y <b>+½</b> modifican la tonalidad solamente de forma temporal. La tonalidad original guardada no cambia.</p>
-    <p>El orden del SETLIST se puede cambiar arrastrando las canciones.</p>
-  </div>
 </section>
 
 </div>
@@ -336,7 +325,36 @@ function guardarLetra(){if(indiceActual<0)return;canciones[indiceActual].letra=d
 
 function mostrarCharts(){const q=(document.getElementById("buscarChart").value||"").toLowerCase(),l=document.getElementById("listaCharts");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📄 ${esc(c.titulo)}</h3><p class="small">${c.chart?"📄 "+esc(c.chartNombre||"Chart PDF"):"Sin chart todavía"}</p>${c.chart?`<button onclick="abrirPDF(${i})">👁 Abrir</button><button onclick="subirPDF(${i})">🔄 Cambiar</button><button class="red" onclick="eliminarPDF(${i})">🗑 Eliminar</button>`:`<button onclick="subirPDF(${i})">📎 Subir PDF</button>`}</div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📄 No hay canciones.</div>'}
 function subirPDF(i){const input=document.createElement("input");input.type="file";input.accept="application/pdf,.pdf";input.onchange=()=>{const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{canciones[i].chart=rd.result;canciones[i].chartNombre=f.name;guardarDatos();toast("✓ PDF guardado");mostrarCharts()};rd.readAsDataURL(f)};input.click()}
-function abrirPDF(i){if(!canciones[i]?.chart){alert("Esta canción no tiene PDF.");return}cerrarPDF();const v=document.createElement("div");v.id="visorPDF";v.innerHTML=`<div class="pdfbar"><button class="secondary" onclick="cerrarPDF()">← Volver</button><strong>📄 ${esc(canciones[i].chartNombre||"Chart")}</strong></div><iframe id="pdfFrame"></iframe>`;document.body.appendChild(v);document.getElementById("pdfFrame").src=canciones[i].chart}
+function abrirPDF(i){
+  if(!canciones[i]?.chart){
+    alert("Esta canción no tiene PDF.");
+    return;
+  }
+
+  try{
+    const partes=canciones[i].chart.split(",");
+
+    if(partes.length < 2){
+      throw new Error("PDF inválido");
+    }
+
+    const bin=atob(partes[1]);
+    const bytes=new Uint8Array(bin.length);
+
+    for(let j=0;j<bin.length;j++){
+      bytes[j]=bin.charCodeAt(j);
+    }
+
+    const blob=new Blob([bytes],{type:"application/pdf"});
+    const url=URL.createObjectURL(blob);
+
+    window.location.href=url;
+
+  }catch(e){
+    console.error("Error al abrir PDF:",e);
+    alert("No se pudo abrir el PDF.");
+  }
+}
 function cerrarPDF(){document.getElementById("visorPDF")?.remove()}
 function eliminarPDF(i){if(confirm("¿Eliminar el PDF?")){delete canciones[i].chart;delete canciones[i].chartNombre;guardarDatos();mostrarCharts()}}
 
