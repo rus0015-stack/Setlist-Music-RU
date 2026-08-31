@@ -166,7 +166,7 @@ public class MainActivity extends Activity {
                 int ancho = page.getWidth();
                 int alto = page.getHeight();
 
-                float escala = 1.0f;
+                float escala = 2.0f;
 
                 int nuevoAncho = (int) (ancho * escala);
                 int nuevoAlto = (int) (alto * escala);
