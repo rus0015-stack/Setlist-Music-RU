@@ -18,7 +18,7 @@
 :root[data-theme="light"]{--bg:#f4f6fa;--panel:#ffffff;--card:#ffffff;--card2:#f0f3f8;--line:#dce2eb;--txt:#18202b;--muted:#667085;--blue:#4f6ff5;--blue2:#3d5ee8;--green:#159a59;--red:#d64545;--orange:#c77d16;--shadow:0 8px 24px rgba(25,35,55,.08)}
 html{background:var(--bg)}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}button,input,textarea,select{font:inherit}button{border:1px solid transparent;border-radius:11px;padding:11px 14px;margin:4px 0;cursor:pointer;color:#fff;background:var(--blue);font-weight:600;transition:.18s ease;box-shadow:0 2px 6px rgba(0,0,0,.08)}button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:active{transform:translateY(0) scale(.98)}button.secondary{background:var(--card2);color:var(--txt);border-color:var(--line);box-shadow:none}.green{background:var(--green)}.red{background:var(--red)}.orange{background:var(--orange)}
 header{background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);padding:16px 20px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center}header .brand{text-align:center}header h1{margin:0 0 2px;font-size:24px;letter-spacing:-.4px}header p{margin:0;color:var(--muted);font-size:13px}.brand-by{font-weight:800;color:var(--blue)!important;font-size:14px!important;margin:0 0 2px!important;letter-spacing:.2px}.theme-control{position:absolute;right:18px;top:12px;display:flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--line);padding:4px;border-radius:12px}.theme-control button{padding:7px 9px;margin:0;background:transparent;color:var(--muted);box-shadow:none;font-size:14px}.theme-control button.active{background:var(--blue);color:#fff}.container{padding:20px;max-width:1120px;margin:auto}.hidden{display:none!important}
-.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.menu button{padding:20px;text-align:left;font-size:17px;background:var(--card);color:var(--txt);border:1px solid var(--line);box-shadow:var(--shadow)}.menu button:first-child{border-color:var(--blue)}.menu small{display:block;color:var(--muted);font-size:12px;margin-top:6px;font-weight:400}.card{background:var(--card);padding:16px;border-radius:16px;margin:12px 0;border:1px solid var(--line);box-shadow:var(--shadow)}.card h2,.card h3,.card h4{margin-top:0}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row .fit{flex:0 0 auto}.small{font-size:12px;color:var(--muted)}
+.menu{display:grid;grid-template-columns:1fr;gap:14px;width:100%}.menu button{display:block;width:100%;box-sizing:border-box;padding:20px;text-align:left;font-size:17px;background:var(--card);color:var(--txt);border:1px solid var(--line);box-shadow:var(--shadow)}.menu button:first-child{border-color:var(--blue)}.menu small{display:block;color:var(--muted);font-size:12px;margin-top:6px;font-weight:400}.card{background:var(--card);padding:16px;border-radius:16px;margin:12px 0;border:1px solid var(--line);box-shadow:var(--shadow)}.card h2,.card h3,.card h4{margin-top:0}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row .fit{flex:0 0 auto}.small{font-size:12px;color:var(--muted)}
 input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--txt);outline:none}input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,124,250,.12)}textarea{min-height:130px;line-height:1.5;resize:vertical}label{font-size:13px;color:var(--muted);font-weight:600}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:var(--card2);color:var(--muted);font-size:12px;margin:2px}
 .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.tabs button{font-size:12px;padding:10px 5px;margin:0}.tocar-pre{white-space:pre-wrap;font-size:22px;line-height:1.65;margin:0;color:var(--txt)}pre{color:var(--txt)}.tono{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px}.tono button{margin:0}.tono .center{background:var(--green)}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.section-head label{margin:0}.insert-separator{width:34px;height:30px;padding:0;margin:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--txt);font-size:18px;font-weight:900;line-height:1;cursor:pointer}.insert-separator:hover{border-color:var(--blue);transform:translateY(-1px)}.section-card{padding:10px 12px;margin:6px 0;border-radius:11px;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--blue)}
@@ -28,7 +28,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
 .live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{min-height:46px;height:46px;margin:0;padding:8px;font-size:16px}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
 #visorPDF{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column}.pdfbar{background:var(--panel);padding:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.pdfbar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pdfbar button{flex:0 0 auto}#pdfFrame{flex:1;width:100%;border:0;background:white}#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:11px 15px;border-radius:12px;z-index:10000;display:none;box-shadow:var(--shadow)}
-@media(max-width:700px){header{padding-right:110px}.theme-control{right:10px;top:18px}.menu{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px}}
+@media(max-width:700px){header{padding-right:110px}.theme-control{right:10px;top:18px}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px}}
 </style>
 </head>
 <body>
@@ -64,7 +64,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="setlist" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
   <h2>📋 SETLIST — MODO DIRECTO</h2><p class="small">Organiza el orden de tu presentación y entra al modo EN VIVO desde cualquier canción.</p>
   <div class="card">
     <label>Nombre del setlist</label>
@@ -97,7 +97,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="canciones" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
   <h2>🎵 Canciones</h2>
   <div class="row"><input id="buscarCancion" placeholder="🔎 Buscar canción..." oninput="mostrarCanciones()"><button class="fit" onclick="nuevaCancion()">＋ Nueva</button></div>
   <div id="listaCanciones"></div>
@@ -119,7 +119,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="letras" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>📝 Letras</h2>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>📝 Letras</h2>
   <input id="buscarLetra" placeholder="🔎 Buscar canción..." oninput="mostrarLetras()"><div id="listaLetras"></div>
 </section>
 
@@ -130,12 +130,12 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="charts" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>📄 Charts</h2>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>📄 Charts</h2>
   <input id="buscarChart" placeholder="🔎 Buscar canción..." oninput="mostrarCharts()"><div id="listaCharts"></div>
 </section>
 
 <section id="secuencias" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
 
   <h2>🎧 Secuencias</h2>
 
@@ -151,7 +151,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="referencias" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>🔗 Referencias</h2>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>🔗 Referencias</h2>
   <input id="buscarReferencia" placeholder="🔎 Buscar canción..." oninput="mostrarReferencias()"><div id="listaReferencias"></div>
 </section>
 
@@ -182,7 +182,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 </section>
 
 <section id="ajustes" class="hidden">
-  <button class="secondary" onclick="inicio()">← Inicio</button><h2>⚙️ Datos y copia de seguridad</h2>
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>⚙️ Datos y copia de seguridad</h2>
   <div class="card">
     <h3>💾 Biblioteca</h3>
     <p class="small">Exporta canciones, setlist, letras, referencias y metadatos. Los archivos de audio y PDF no se incluyen en el JSON por tamaño; permanecen en este navegador.</p>
@@ -229,7 +229,7 @@ function esc(t){return String(t??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").
 function guardarDatos(){localStorage.setItem("canciones",JSON.stringify(canciones));localStorage.setItem("setlist",JSON.stringify(setlist));localStorage.setItem("setlistConfig",JSON.stringify(config))}
 function ocultarTodo(){document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"))}
 function abrir(n){ocultarTodo();document.getElementById(n).classList.remove("hidden");if(n==="canciones")mostrarCanciones();if(n==="letras")mostrarLetras();if(n==="charts")mostrarCharts();if(n==="setlist")mostrarSetlist();if(n==="secuencias")mostrarSecuencias();if(n==="referencias")mostrarReferencias()}
-function inicio(){cerrarPDF();ocultarTodo();document.getElementById("inicio").classList.remove("hidden")}
+function volverInicio(){cerrarPDF();ocultarTodo();document.getElementById("inicio").classList.remove("hidden");window.scrollTo({top:0,behavior:"instant"})}
 function guardarNombreSetlist(){config.nombre=document.getElementById("nombreSetlist").value.trim()||"Mi Setlist";guardarDatos();toast("✓ Nombre guardado")}
 function normalizarNota(n){return EQUIVALENCIAS[n]||n}
 function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
@@ -416,15 +416,15 @@ function cancionSiguiente(){
   tocarPorId(setlist[p+1]);
 }
 
-function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();inicio()}
+function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();volverInicio()}
 
 function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
 function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones;setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
-function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");inicio()}
+function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
 
 window.addEventListener("beforeunload",()=>guardarDatos());
-inicio();
+volverInicio();
 </script>
 </body>
 </html>
