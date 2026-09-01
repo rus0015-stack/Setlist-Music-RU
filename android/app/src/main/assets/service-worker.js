@@ -1,4 +1,4 @@
-const CACHE = 'setlist-music-v4-6-fix';
+const CACHE = 'setlist-music-v4-7-fix';
 const CORE = [
   './',
   './index.html',
