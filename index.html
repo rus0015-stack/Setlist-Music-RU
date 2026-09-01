@@ -500,72 +500,193 @@ function cancionSiguiente(){
 function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();volverInicio()}
 
 function exportarDatos(){
-  try{
+
+  try {
+
     const data = {
       version: 3,
       fecha: new Date().toISOString(),
 
-      // Canciones completas
       canciones: canciones.map(c => ({
-        ...c,
-
-        // Se incluye el PDF
-        chart: c.chart || null,
-        chartNombre: c.chartNombre || null,
-
-        // Se incluyen las letras
-        letra: c.letra || "",
-
-        // Se incluyen las referencias
-        referencias: c.referencias || [],
-
-        // Se incluye la estructura
-        estructura: c.estructura || {},
-
-        // Información adicional
+        id: c.id || "",
         titulo: c.titulo || "",
         autor: c.autor || "",
         tonalidad: c.tonalidad || "C",
         bpm: c.bpm || "",
-        notas: c.notas || ""
+        notas: c.notas || "",
+
+        estructura: c.estructura || {},
+        contenido: c.contenido || "",
+
+        letra: c.letra || "",
+
+        referencias: Array.isArray(c.referencias)
+          ? c.referencias
+          : [],
+
+        chart: c.chart || null,
+        chartNombre: c.chartNombre || null
       })),
 
-      // Orden del setlist
-      setlist: [...setlist],
+      setlist: Array.isArray(setlist)
+        ? [...setlist]
+        : [],
 
-      // Nombre/configuración del setlist
-      config: {...config}
+      config: config || {
+        nombre: "Mi Setlist"
+      }
     };
 
     const json = JSON.stringify(data, null, 2);
 
     const blob = new Blob(
       [json],
-      {type:"application/json;charset=utf-8"}
+      {
+        type: "application/json"
+      }
     );
 
     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Setlist_Music_backup.json";
+    const enlace = document.createElement("a");
 
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    enlace.href = url;
+    enlace.download = "Setlist_Music_backup.json";
+    enlace.target = "_blank";
 
-    setTimeout(() => {
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    document.body.removeChild(enlace);
+
+    setTimeout(function(){
       URL.revokeObjectURL(url);
-    }, 2000);
+    }, 5000);
 
     toast("✓ JSON exportado correctamente");
 
-  }catch(e){
-    console.error("Error al exportar JSON:", e);
-    alert("No se pudo exportar el archivo JSON.");
+  } catch(error) {
+
+    console.error("ERROR EXPORTANDO JSON:", error);
+
+    alert(
+      "No se pudo exportar el JSON.\n\n" +
+      "Error: " + error.message
+    );
+
   }
 }
-function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones;setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
+
+
+function importarDatos(input){
+
+  const archivo = input.files && input.files[0];
+
+  if(!archivo){
+    return;
+  }
+
+  const lector = new FileReader();
+
+  lector.onload = function(){
+
+    try {
+
+      const datos = JSON.parse(lector.result);
+
+      if(!datos || !Array.isArray(datos.canciones)){
+        throw new Error("El archivo no contiene una biblioteca válida.");
+      }
+
+      canciones = datos.canciones;
+
+      setlist = Array.isArray(datos.setlist)
+        ? datos.setlist
+        : [];
+
+      config = datos.config || {
+        nombre: "Mi Setlist"
+      };
+
+      /*
+       * Asegurar IDs de todas las canciones
+       */
+      canciones.forEach(function(c){
+
+        if(!c.id){
+
+          c.id =
+            "song_" +
+            Date.now() +
+            "_" +
+            Math.random()
+              .toString(36)
+              .slice(2,10);
+
+        }
+
+      });
+
+      /*
+       * Eliminar del setlist canciones
+       * que ya no existan
+       */
+      setlist = setlist.filter(function(id){
+
+        return canciones.some(function(c){
+
+          return String(c.id) === String(id);
+
+        });
+
+      });
+
+      guardarDatos();
+
+      toast("✓ Biblioteca restaurada correctamente");
+
+      setTimeout(function(){
+
+        mostrarSetlist();
+
+        abrir("setlist");
+
+      }, 300);
+
+    } catch(error) {
+
+      console.error(
+        "ERROR IMPORTANDO JSON:",
+        error
+      );
+
+      alert(
+        "No se pudo importar el archivo JSON.\n\n" +
+        error.message
+      );
+
+    }
+
+  };
+
+  lector.onerror = function(){
+
+    alert(
+      "No se pudo leer el archivo JSON."
+    );
+
+  };
+
+  lector.readAsText(archivo);
+
+  /*
+   * Permite volver a seleccionar
+   * el mismo archivo posteriormente.
+   */
+  input.value = "";
+
+}
 function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
 
 window.addEventListener("beforeunload",()=>guardarDatos());
