@@ -505,12 +505,12 @@ function cancionSiguiente(){
 
 function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();volverInicio()}
 
-function exportarDatos(){
+async function exportarDatos(){
 
-  try {
+  try{
 
     const data = {
-      version: 3,
+      version: 4,
       fecha: new Date().toISOString(),
 
       canciones: canciones.map(c => ({
@@ -520,113 +520,106 @@ function exportarDatos(){
         tonalidad: c.tonalidad || "C",
         bpm: c.bpm || "",
         notas: c.notas || "",
+
         estructura: c.estructura || {},
         contenido: c.contenido || "",
+
         letra: c.letra || "",
-        referencias: c.referencias || [],
+
+        referencias: Array.isArray(c.referencias)
+          ? c.referencias
+          : [],
+
         chart: c.chart || null,
         chartNombre: c.chartNombre || null
       })),
 
-      setlist: [...setlist],
+      setlist: Array.isArray(setlist)
+        ? [...setlist]
+        : [],
 
-      config: {...config}
+      config: config || {
+        nombre: "Mi Setlist"
+      }
     };
 
     const json = JSON.stringify(data, null, 2);
 
-    /*
-     * Crear archivo
-     */
-    const blob = new Blob(
-      [json],
-      {type:"application/json"}
-    );
+    /* ==========================================
+       MÉTODO 1 — GUARDAR ARCHIVO DIRECTAMENTE
+       ========================================== */
 
-    /*
-     * Intentar compartir directamente
-     * en Android
-     */
-    if(
-      navigator.share &&
-      navigator.canShare
-    ){
+    if("showSaveFilePicker" in window){
 
-      const archivo = new File(
-        [blob],
-        "Setlist_Music_backup.json",
-        {
-          type:"application/json"
-        }
-      );
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "Setlist_Music_backup.json",
+        types: [
+          {
+            description: "Archivo JSON",
+            accept: {
+              "application/json": [".json"]
+            }
+          }
+        ]
+      });
 
-      if(
-        navigator.canShare({
-          files:[archivo]
-        })
-      ){
+      const writable = await handle.createWritable();
 
-        navigator.share({
-          title:"Setlist Music",
-          text:"Copia de seguridad",
-          files:[archivo]
-        })
-        .then(function(){
+      await writable.write(json);
 
-          toast("✓ Copia de seguridad lista");
+      await writable.close();
 
-        })
-        .catch(function(error){
+      toast("✓ JSON guardado correctamente");
 
-          console.log(
-            "Compartir cancelado:",
-            error
-          );
-
-        });
-
-        return;
-      }
+      return;
     }
 
-    /*
-     * Si no funciona compartir,
-     * intentar descarga
-     */
-    const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
+    /* ==========================================
+       MÉTODO 2 — ANDROID / CHROME / PWA
+       ========================================== */
 
-    a.href = url;
-    a.download = "Setlist_Music_backup.json";
-
-    a.style.display = "none";
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    document.body.removeChild(a);
-
-    setTimeout(function(){
-
-      URL.revokeObjectURL(url);
-
-    },10000);
-
-    toast("✓ Exportación iniciada");
-
-  }
-
-  catch(error){
-
-    console.error(
-      "ERROR EXPORTANDO:",
-      error
+    const blob = new Blob(
+      [json],
+      {
+        type: "application/json;charset=utf-8"
+      }
     );
 
+    const url = URL.createObjectURL(blob);
+
+    const enlace = document.createElement("a");
+
+    enlace.href = url;
+    enlace.download = "Setlist_Music_backup.json";
+
+    enlace.target = "_blank";
+
+    enlace.rel = "noopener";
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 5000);
+
+    toast("✓ JSON exportado");
+
+  }catch(error){
+
+    console.error("ERROR EXPORTANDO:", error);
+
+    if(error.name === "AbortError"){
+      toast("Exportación cancelada");
+      return;
+    }
+
     alert(
-      "ERROR AL EXPORTAR:\n\n" +
+      "No se pudo guardar el archivo JSON.\n\n" +
       error.message
     );
 
