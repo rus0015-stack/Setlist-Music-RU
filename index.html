@@ -186,7 +186,13 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   <div class="card">
     <h3>💾 Biblioteca</h3>
     <p class="small">Exporta canciones, setlist, letras, referencias y metadatos. Los archivos de audio y PDF no se incluyen en el JSON por tamaño; permanecen en este navegador.</p>
-    <button class="green" onclick="exportarDatos()">⬇ Exportar JSON</button>
+    <button type="button" class="green" onclick="exportarDatos()">
+  ⬇ Exportar JSON
+</button>
+
+<button type="button" onclick="alert('EL BOTÓN FUNCIONA')">
+  🧪 PRUEBA
+</button>
     <button onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
     <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importarDatos(this)">
   </div>
@@ -514,71 +520,119 @@ function exportarDatos(){
         tonalidad: c.tonalidad || "C",
         bpm: c.bpm || "",
         notas: c.notas || "",
-
         estructura: c.estructura || {},
         contenido: c.contenido || "",
-
         letra: c.letra || "",
-
-        referencias: Array.isArray(c.referencias)
-          ? c.referencias
-          : [],
-
+        referencias: c.referencias || [],
         chart: c.chart || null,
         chartNombre: c.chartNombre || null
       })),
 
-      setlist: Array.isArray(setlist)
-        ? [...setlist]
-        : [],
+      setlist: [...setlist],
 
-      config: config || {
-        nombre: "Mi Setlist"
-      }
+      config: {...config}
     };
 
     const json = JSON.stringify(data, null, 2);
 
+    /*
+     * Crear archivo
+     */
     const blob = new Blob(
       [json],
-      {
-        type: "application/json"
-      }
+      {type:"application/json"}
     );
 
+    /*
+     * Intentar compartir directamente
+     * en Android
+     */
+    if(
+      navigator.share &&
+      navigator.canShare
+    ){
+
+      const archivo = new File(
+        [blob],
+        "Setlist_Music_backup.json",
+        {
+          type:"application/json"
+        }
+      );
+
+      if(
+        navigator.canShare({
+          files:[archivo]
+        })
+      ){
+
+        navigator.share({
+          title:"Setlist Music",
+          text:"Copia de seguridad",
+          files:[archivo]
+        })
+        .then(function(){
+
+          toast("✓ Copia de seguridad lista");
+
+        })
+        .catch(function(error){
+
+          console.log(
+            "Compartir cancelado:",
+            error
+          );
+
+        });
+
+        return;
+      }
+    }
+
+    /*
+     * Si no funciona compartir,
+     * intentar descarga
+     */
     const url = URL.createObjectURL(blob);
 
-    const enlace = document.createElement("a");
+    const a = document.createElement("a");
 
-    enlace.href = url;
-    enlace.download = "Setlist_Music_backup.json";
-    enlace.target = "_blank";
+    a.href = url;
+    a.download = "Setlist_Music_backup.json";
 
-    document.body.appendChild(enlace);
+    a.style.display = "none";
 
-    enlace.click();
+    document.body.appendChild(a);
 
-    document.body.removeChild(enlace);
+    a.click();
+
+    document.body.removeChild(a);
 
     setTimeout(function(){
+
       URL.revokeObjectURL(url);
-    }, 5000);
 
-    toast("✓ JSON exportado correctamente");
+    },10000);
 
-  } catch(error) {
+    toast("✓ Exportación iniciada");
 
-    console.error("ERROR EXPORTANDO JSON:", error);
+  }
+
+  catch(error){
+
+    console.error(
+      "ERROR EXPORTANDO:",
+      error
+    );
 
     alert(
-      "No se pudo exportar el JSON.\n\n" +
-      "Error: " + error.message
+      "ERROR AL EXPORTAR:\n\n" +
+      error.message
     );
 
   }
+
 }
-
-
 function importarDatos(input){
 
   const archivo = input.files && input.files[0];
