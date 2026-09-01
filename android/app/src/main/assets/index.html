@@ -239,6 +239,26 @@ if(window.matchMedia){window.matchMedia("(prefers-color-scheme: dark)").addEvent
 const SECCIONES=[["intro","INTRO"],["verso","VERSO"],["precoro","PRECORO"],["coro","CORO"],["instrumental","INSTRUMENTAL"],["puente","PUENTE"],["solo","SOLO"],["final","FINAL"]];
 const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const EQUIVALENCIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
+function normalizarNota(n){
+  if(!n) return "C";
+
+  let nota=String(n).trim();
+
+  // Equivalencias bemol → sostenido
+  if(EQUIVALENCIAS[nota]){
+    nota=EQUIVALENCIAS[nota];
+  }
+
+  // Normalizar minúsculas
+  nota=nota.charAt(0).toUpperCase()+nota.slice(1);
+
+  // Validar
+  if(NOTAS.includes(nota)){
+    return nota;
+  }
+
+  return "C";
+}  
 let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
 let setlist=JSON.parse(localStorage.getItem("setlist")||"[]");
 let config=JSON.parse(localStorage.getItem("setlistConfig")||'{"nombre":"Mi Setlist"}');
