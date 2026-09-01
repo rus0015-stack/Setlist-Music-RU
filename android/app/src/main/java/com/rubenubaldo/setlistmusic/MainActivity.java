@@ -12,6 +12,8 @@ import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -157,7 +159,7 @@ public class MainActivity extends Activity {
             LinearLayout contenido = new LinearLayout(this);
             contenido.setOrientation(LinearLayout.VERTICAL);
             contenido.setBackgroundColor(Color.WHITE);
-            contenido.setPadding(8, 8, 8, 8);
+            contenido.setPadding(0, 0, 0, 0);
 
             for (int i = 0; i < renderer.getPageCount(); i++) {
 
@@ -188,8 +190,7 @@ public class MainActivity extends Activity {
 
                 page.close();
 
-                ImageView imagen = new ImageView(this);
-
+                ZoomImageView imagen = new ZoomImageView(this);
                 imagen.setImageBitmap(bitmap);
                 imagen.setAdjustViewBounds(true);
                 imagen.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -200,7 +201,7 @@ public class MainActivity extends Activity {
                                 ViewGroup.LayoutParams.WRAP_CONTENT
                         );
 
-                parametros.bottomMargin = 10;
+                parametros.bottomMargin = 0;
 
                 contenido.addView(imagen, parametros);
             }
@@ -209,8 +210,10 @@ public class MainActivity extends Activity {
             descriptor.close();
 
             ScrollView scroll = new ScrollView(this);
-            scroll.setBackgroundColor(Color.rgb(30, 30, 30));
-            scroll.addView(contenido);
+scroll.setBackgroundColor(Color.WHITE);
+scroll.setFillViewport(true);
+scroll.setPadding(0, 0, 0, 0);
+scroll.addView(contenido);
 
             LinearLayout principal = new LinearLayout(this);
             principal.setOrientation(LinearLayout.VERTICAL);
@@ -283,7 +286,46 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
+private class ZoomImageView extends ImageView {
 
+    private float escala = 1.0f;
+    private ScaleGestureDetector detector;
+
+    public ZoomImageView(android.content.Context context) {
+        super(context);
+
+        setAdjustViewBounds(true);
+        setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        detector = new ScaleGestureDetector(
+                context,
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detector) {
+
+                        escala *= detector.getScaleFactor();
+
+                        escala = Math.max(
+                                1.0f,
+                                Math.min(escala, 4.0f)
+                        );
+
+                        setScaleX(escala);
+                        setScaleY(escala);
+
+                        return true;
+                    }
+                }
+        );
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        detector.onTouchEvent(event);
+        return true;
+    }
+}
     private void cerrarPDFAndroid() {
 
         if (pdfViewer != null) {
