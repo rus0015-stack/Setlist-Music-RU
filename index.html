@@ -499,7 +499,84 @@ function cancionSiguiente(){
 
 function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();volverInicio()}
 
-function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
+function exportarDatos(){
+
+  try{
+
+    const cancionesExportadas = canciones.map(c => {
+
+      // Copia de la canción sin información de secuencia/audio
+      const copia = JSON.parse(JSON.stringify(c));
+
+      delete copia.audioName;
+      delete copia.audioData;
+      delete copia.audioMime;
+      delete copia.duracion;
+
+      return copia;
+
+    });
+
+    const data = {
+
+      version: 3,
+
+      app: "Setlist Music",
+
+      fecha: new Date().toISOString(),
+
+      config: config,
+
+      setlist: [...setlist],
+
+      canciones: cancionesExportadas
+
+    };
+
+    const json = JSON.stringify(data, null, 2);
+
+    const blob = new Blob(
+      [json],
+      {
+        type: "application/json;charset=utf-8"
+      }
+    );
+
+    descargar(
+      blob,
+      "Setlist_Music_backup_" + fechaArchivo() + ".json"
+    );
+
+    toast("✓ Respaldo exportado");
+
+  }catch(e){
+
+    console.error("Error exportando datos:", e);
+
+    alert("❌ No se pudo crear el respaldo.");
+
+  }
+
+}
+
+
+function fechaArchivo(){
+
+  const d = new Date();
+
+  const y = d.getFullYear();
+
+  const m = String(d.getMonth()+1).padStart(2,"0");
+
+  const dia = String(d.getDate()).padStart(2,"0");
+
+  const h = String(d.getHours()).padStart(2,"0");
+
+  const min = String(d.getMinutes()).padStart(2,"0");
+
+  return `${y}-${m}-${dia}_${h}-${min}`;
+
+}
 function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones;setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
 function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
