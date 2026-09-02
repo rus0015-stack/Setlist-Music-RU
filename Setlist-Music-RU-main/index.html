@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#f4f6fa">
+<meta name="description" content="Setlist Music — biblioteca musical y modo directo para músicos.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<title>Setlist Music 4.7 FIX — Rubén Ubaldo</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0f1117;--panel:#151923;--card:#1b202b;--card2:#202633;--line:#303847;--txt:#f5f7fb;--muted:#9aa5b5;--blue:#5b7cfa;--blue2:#4165e8;--green:#19b86b;--red:#e05252;--orange:#e09a3e;--shadow:0 10px 30px rgba(0,0,0,.18)}
+:root[data-theme="light"]{--bg:#f4f6fa;--panel:#ffffff;--card:#ffffff;--card2:#f0f3f8;--line:#dce2eb;--txt:#18202b;--muted:#667085;--blue:#4f6ff5;--blue2:#3d5ee8;--green:#159a59;--red:#d64545;--orange:#c77d16;--shadow:0 8px 24px rgba(25,35,55,.08)}
+html{background:var(--bg)}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:calc(34px + env(safe-area-inset-bottom, 0px))}button,input,textarea,select{font:inherit}button{border:1px solid transparent;border-radius:11px;padding:11px 14px;margin:4px 0;cursor:pointer;color:#fff;background:var(--blue);font-weight:600;transition:.18s ease;box-shadow:0 2px 6px rgba(0,0,0,.08)}button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:active{transform:translateY(0) scale(.98)}button.secondary{background:var(--card2);color:var(--txt);border-color:var(--line);box-shadow:none}.green{background:var(--green)}.red{background:var(--red)}.orange{background:var(--orange)}
+header{background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);padding:16px 20px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center}header .brand{text-align:center}header h1{margin:0 0 2px;font-size:24px;letter-spacing:-.4px}header p{margin:0;color:var(--muted);font-size:13px}.brand-by{font-weight:800;color:var(--blue)!important;font-size:14px!important;margin:0 0 2px!important;letter-spacing:.2px}.theme-control{position:absolute;right:18px;top:12px;display:flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--line);padding:4px;border-radius:12px}.theme-control button{padding:7px 9px;margin:0;background:transparent;color:var(--muted);box-shadow:none;font-size:14px}.theme-control button.active{background:var(--blue);color:#fff}.container{padding:20px;max-width:1120px;margin:auto}.hidden{display:none!important}
+.menu{display:grid;grid-template-columns:1fr;gap:14px;width:100%}.menu button{display:block;width:100%;box-sizing:border-box;padding:20px;text-align:left;font-size:17px;background:var(--card);color:var(--txt);border:1px solid var(--line);box-shadow:var(--shadow)}.menu button:first-child{border-color:var(--blue)}.menu small{display:block;color:var(--muted);font-size:12px;margin-top:6px;font-weight:400}.card{background:var(--card);padding:16px;border-radius:16px;margin:12px 0;border:1px solid var(--line);box-shadow:var(--shadow)}.card h2,.card h3,.card h4{margin-top:0}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row .fit{flex:0 0 auto}.small{font-size:12px;color:var(--muted)}
+input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--txt);outline:none}input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,124,250,.12)}textarea{min-height:130px;line-height:1.5;resize:vertical}label{font-size:13px;color:var(--muted);font-weight:600}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:var(--card2);color:var(--muted);font-size:12px;margin:2px}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.tabs button{font-size:12px;padding:10px 5px;margin:0}.tocar-pre{white-space:pre-wrap;font-size:22px;line-height:1.65;margin:0;color:var(--txt)}pre{color:var(--txt)}.tono{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px}.tono button{margin:0}.tono .center{background:var(--green)}
+.editor-actions{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom, 0px));z-index:15;display:flex;gap:10px;align-items:center;justify-content:center;padding:10px;margin:14px 0 8px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.22)}.editor-actions button{margin:0;min-width:130px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.section-head label{margin:0}.insert-separator{width:34px;height:30px;padding:0;margin:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--txt);font-size:18px;font-weight:900;line-height:1;cursor:pointer}.insert-separator:hover{border-color:var(--blue);transform:translateY(-1px)}.section-card{padding:10px 12px;margin:6px 0;border-radius:11px;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--blue)}
+.section-card.section-intro{border-left-color:#3b82f6}.section-card.section-verso{border-left-color:#22c55e}.section-card.section-precoro{border-left-color:#eab308}.section-card.section-coro{border-left-color:#ef4444}.section-card.section-instrumental{border-left-color:#a855f7}.section-card.section-puente{border-left-color:#f97316}.section-card.section-solo{border-left-color:#ec4899}.section-card.section-final{border-left-color:#14b8a6}
+.section-label{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:8px;background:var(--card2);color:var(--txt)}
+.live-section{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);border-left:5px solid var(--blue)}
+.live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
+.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{min-height:46px;height:46px;margin:0;padding:8px;font-size:16px}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+#visorPDF{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column}.pdfbar{background:var(--panel);padding:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.pdfbar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pdfbar button{flex:0 0 auto}#pdfFrame{flex:1;width:100%;border:0;background:white}#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:11px 15px;border-radius:12px;z-index:10000;display:none;box-shadow:var(--shadow)}
+@media(max-width:700px){header{padding-right:110px}.theme-control{right:10px;top:18px}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px;padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px))}.editor-actions{bottom:calc(8px + env(safe-area-inset-bottom, 0px));padding:9px;margin-top:12px}.editor-actions button{flex:1;min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>🎵 Setlist Music</h1><p class="brand-by">By Rubén Ubaldo</p><p>Tu música para tocar en vivo</p></div>
+  <div class="theme-control" aria-label="Apariencia">
+    <button id="themeLight" onclick="setTheme('light')" title="Modo claro">☀️</button>
+    <button id="themeDark" onclick="setTheme('dark')" title="Modo oscuro">🌙</button>
+    <button id="themeAuto" onclick="setTheme('auto')" title="Automático">🖥️</button>
+  </div>
+</header>
+
+<div class="container">
+
+<section id="inicio">
+  <div class="card">
+    <div class="row">
+      <div><b>🎤 SETLIST — MODO DIRECTO</b><div class="small">Organiza el orden de tu presentación y entra al modo en vivo desde cada canción.</div></div>
+      <button class="fit green" onclick="abrir('setlist')">▶ Abrir SETLIST</button>
+    </div>
+  </div>
+  <div class="menu">
+    <button onclick="abrir('canciones')">🎵 CANCIONES<small>Acordes, estructura, tonalidad y edición</small></button>
+    <button onclick="abrir('letras')">📝 LETRAS<small>Letra de cada canción y lectura en vivo</small></button>
+    <button onclick="abrir('charts')">📄 CHARTS<small>Guardar y visualizar PDFs</small></button>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">
+  🎧 SECUENCIA
+  <small>Abre tus secuencias musicales en Google Drive</small>
+</button>
+    <button onclick="abrir('referencias')">🔗 REFERENCIA<small>Links de YouTube, Spotify, Drive u otras fuentes</small></button>
+    <button onclick="abrir('ajustes')">⚙️ DATOS / COPIA<small>Exportar, importar y recuperar tu biblioteca</small></button>
+      </div>
+</section>
+
+<section id="setlist" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
+  <h2>📋 SETLIST — MODO DIRECTO</h2><p class="small">Organiza el orden de tu presentación y entra al modo EN VIVO desde cualquier canción.</p>
+  <div class="card">
+    <label>Nombre del setlist</label>
+    <input id="nombreSetlist" placeholder="Ej.: Culto domingo / Concierto">
+    <div class="row">
+      <button class="green fit" onclick="guardarNombreSetlist()">💾 Guardar nombre</button>
+      <button class="fit" onclick="abrirSelectorSetlist()">＋ Agregar canción</button>
+      <button class="secondary fit" onclick="limpiarSetlist()">🗑 Vaciar</button>
+    </div>
+  </div>
+  <div id="selectorSetlist" class="card hidden">
+    <h3>🎵 Seleccionar canciones</h3>
+    <p class="small">Marca una o varias canciones y pulsa “Agregar seleccionadas”.</p>
+    <input id="buscarParaSetlist" placeholder="🔎 Buscar canción..." oninput="renderSelectorSetlist()">
+    <div id="opcionesSetlist"></div>
+    <div class="row">
+      <button class="green fit" onclick="agregarSeleccionadasSetlist()">✓ Agregar seleccionadas</button>
+      <button class="secondary fit" onclick="cerrarSelectorSetlist()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stat">
+      <div><b id="setCount">0</b><span class="small">canciones</span></div>
+      <div><b id="setTime">0:00</b><span class="small">duración</span></div>
+      <div><b id="setKey">—</b><span class="small">tonalidades</span></div>
+    </div>
+  </div>
+  <div id="listaSetlist"></div>
+</section>
+
+<section id="canciones" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
+  <h2>🎵 Canciones</h2>
+  <div class="row"><input id="buscarCancion" placeholder="🔎 Buscar canción..." oninput="mostrarCanciones()"><button class="fit" onclick="nuevaCancion()">＋ Nueva</button></div>
+  <div id="listaCanciones"></div>
+</section>
+
+<section id="editor" class="hidden">
+  <button class="secondary" onclick="abrir('canciones')">← Volver</button>
+  <h2>🎵 Editar canción</h2>
+  <label>Título</label><input id="titulo" placeholder="Nombre de la canción">
+  <label>Tonalidad original</label>
+  <select id="tonalidad"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option><option>A#</option><option>B</option></select>
+  <label>Autor / cantante</label><input id="autor" placeholder="Ej.: Nombre del cantante">
+  <label>Tempo (BPM)</label><input id="bpm" type="number" min="1" max="300" placeholder="Ej.: 92">
+  <h3>🎼 Estructura</h3>
+  <p class="small">Escribe acordes o notas. La app coloca automáticamente el nombre de cada sección.</p>
+  <div id="estructuraCancion"></div>
+  <label>Notas / observaciones</label><textarea id="notasCancion" placeholder="Capo, afinación, indicaciones para músicos, dinámica, etc."></textarea>
+  <div class="editor-actions" role="group" aria-label="Acciones de la canción"><button class="green" onclick="guardarCancion()">💾 Guardar</button><button class="red" onclick="eliminarCancionActual()">🗑 Eliminar</button></div>
+</section>
+
+<section id="letras" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>📝 Letras</h2>
+  <input id="buscarLetra" placeholder="🔎 Buscar canción..." oninput="mostrarLetras()"><div id="listaLetras"></div>
+</section>
+
+<section id="editorLetra" class="hidden">
+  <button class="secondary" onclick="abrir('letras')">← Volver</button><h2 id="tituloLetra"></h2>
+  <textarea id="textoLetra" style="min-height:55vh" placeholder="Escribe aquí la letra..."></textarea>
+  <button class="green" onclick="guardarLetra()">💾 Guardar letra</button>
+</section>
+
+<section id="charts" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>📄 Charts</h2>
+  <input id="buscarChart" placeholder="🔎 Buscar canción..." oninput="mostrarCharts()"><div id="listaCharts"></div>
+</section>
+
+<section id="secuencias" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button>
+
+  <h2>🎧 Secuencias</h2>
+
+  <p class="small">
+    Accede a tus secuencias musicales almacenadas en Google Drive.
+  </p>
+
+  <button
+    class="primary"
+    onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">
+    🎵 Abrir mis secuencias
+  </button>
+</section>
+
+<section id="referencias" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>🔗 Referencias</h2>
+  <input id="buscarReferencia" placeholder="🔎 Buscar canción..." oninput="mostrarReferencias()"><div id="listaReferencias"></div>
+</section>
+
+<section id="editorReferencia" class="hidden">
+  <button class="secondary" onclick="abrir('referencias')">← Volver</button><h2 id="tituloReferencia"></h2>
+  <label>Nombre de la referencia</label><input id="refNombre" placeholder="Ej.: Video oficial / Referencia de ensayo">
+  <label>URL</label><input id="refUrl" type="url" placeholder="https://...">
+  <button class="green" onclick="guardarReferencia()">💾 Guardar referencia</button>
+</section>
+
+<section id="tocar" class="hidden">
+  <button class="secondary" onclick="cerrarTocar()">✕ Salir</button>
+  <h2 id="tocarTitulo"></h2><h3 id="tocarTonalidad"></h3>
+  <div class="tono"><button onclick="cambiarTonalidad(-1)">− ½</button><button id="botonTonalidad" class="center">Tonalidad: C</button><button onclick="cambiarTonalidad(1)">+ ½</button></div>
+  <div class="row" style="margin:8px 0">
+    <button class="secondary fit" onclick="cancionAnterior()">← Anterior</button>
+    <button class="secondary fit" onclick="cancionSiguiente()">Siguiente →</button>
+  </div>
+  <div class="tabs">
+    <button onclick="mostrarVistaTocar('cancion')">🎵 Canción</button>
+    <button onclick="mostrarVistaTocar('letra')">📝 Letra</button>
+    <button onclick="mostrarVistaTocar('chart')">📄 Chart</button>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u', '_blank')">🎧 Sec.</button>
+    <button onclick="mostrarVistaTocar('referencia')">🔗 Ref.</button>
+    <button onclick="abrirEditorDesdeTocar()">✏ Editar</button>
+  </div>
+  <div class="card"><pre id="tocarContenido" class="tocar-pre"></pre></div>
+</section>
+
+<section id="ajustes" class="hidden">
+  <button class="secondary" onclick="volverInicio()">← Inicio</button><h2>⚙️ Datos y copia de seguridad</h2>
+  <div class="card">
+    <h3>💾 Biblioteca</h3>
+    <p class="small">Exporta canciones, setlist, letras, referencias y metadatos. Los archivos de audio y PDF no se incluyen en el JSON por tamaño; permanecen en este navegador.</p>
+    <button class="green" onclick="exportarDatos()">⬇ Exportar JSON</button>
+    <button onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
+    <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importarDatos(this)">
+  </div>
+  <div class="card"><h3>🧹 Restauración</h3><button class="red" onclick="borrarBiblioteca()">Borrar canciones y setlist</button></div>
+</section>
+
+</div>
+<div id="toast"></div>
+
+<script>
+function applyTheme(){const saved=localStorage.getItem("setlistTheme")||"auto";const dark=saved==="dark"||(saved==="auto"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";["Light","Dark","Auto"].forEach(x=>document.getElementById("theme"+x)?.classList.remove("active"));document.getElementById("theme"+(saved==="light"?"Light":saved==="dark"?"Dark":"Auto"))?.classList.add("active");document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#0f1117":"#f4f6fa")}
+function setTheme(mode){localStorage.setItem("setlistTheme",mode);applyTheme();toast(mode==="light"?"☀️ Modo claro":mode==="dark"?"🌙 Modo oscuro":"🖥️ Modo automático")}
+
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));}
+applyTheme();
+if(window.matchMedia){window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if((localStorage.getItem("setlistTheme")||"auto")==="auto")applyTheme()})}
+const SECCIONES=[["intro","INTRO"],["verso","VERSO"],["precoro","PRECORO"],["coro","CORO"],["instrumental","INSTRUMENTAL"],["puente","PUENTE"],["solo","SOLO"],["final","FINAL"]];
+const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const EQUIVALENCIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
+let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
+let setlist=JSON.parse(localStorage.getItem("setlist")||"[]");
+let config=JSON.parse(localStorage.getItem("setlistConfig")||'{"nombre":"Mi Setlist"}');
+let indiceActual=-1,tonalidadTemporal=null,dragIndex=null;
+
+/* Migración: todas las canciones deben tener un ID estable. */
+let datosMigrados=false;
+canciones.forEach(c=>{
+  delete c.tonalidadActual;
+  if(!c.id){
+    c.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+    datosMigrados=true;
+  }
+});
+if(datosMigrados) localStorage.setItem("canciones",JSON.stringify(canciones));
+setlist=setlist.filter(id=>canciones.some(c=>c.id===id));
+localStorage.setItem("setlist",JSON.stringify(setlist));
+
+function toast(t){const x=document.getElementById("toast");x.textContent=t;x.style.display="block";clearTimeout(window._toast);window._toast=setTimeout(()=>x.style.display="none",1800)}
+function esc(t){return String(t??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function guardarDatos(){localStorage.setItem("canciones",JSON.stringify(canciones));localStorage.setItem("setlist",JSON.stringify(setlist));localStorage.setItem("setlistConfig",JSON.stringify(config))}
+function ocultarTodo(){document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"))}
+function abrir(n){
+  const destino=document.getElementById(n);
+  if(!destino){console.error("Sección no encontrada:",n);return false;}
+  ocultarTodo();
+  destino.classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"auto"});
+  if(n==="canciones")mostrarCanciones();
+  else if(n==="letras")mostrarLetras();
+  else if(n==="charts")mostrarCharts();
+  else if(n==="setlist")mostrarSetlist();
+  else if(n==="secuencias")mostrarSecuencias();
+  else if(n==="referencias")mostrarReferencias();
+  return true;
+}
+function volverInicio(){
+  document.getElementById("liveAudio")?.remove();
+  cerrarPDF();
+  ocultarTodo();
+  const inicio=document.getElementById("inicio");
+  if(inicio)inicio.classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"auto"});
+}
+function guardarNombreSetlist(){config.nombre=document.getElementById("nombreSetlist").value.trim()||"Mi Setlist";guardarDatos();toast("✓ Nombre guardado")}
+function normalizarNota(n){return EQUIVALENCIAS[n]||n}
+function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
+function normalizarAcordesTexto(texto){if(!texto)return "";let t=String(texto).replace(/\s*[-–—]\s*/g," | ");const patron=/(^|[\s|([\{,:;])([a-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?=$|[\s|)\]\},:;.])/g;return t.replace(patron,(m,a,n,al,q)=>a+n.toUpperCase()+(al||"")+(q||""))}
+function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card";d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="1" placeholder="Ej.: D | A | Bm | G">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value)});boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\\s)\\|\\s*$/.test(antes)||/^\\s*\\|(?:\\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
+function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
+function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
+function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
+
+function nuevaCancion(){indiceActual=-1;["titulo","autor","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
+function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
+function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura()};n.contenido=estructuraAContenido(n.estructura);if(indiceActual<0){
+  n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+  canciones.push(n);
+}else{
+  n.id=canciones[indiceActual].id || "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+  canciones[indiceActual]=n;
+}
+guardarDatos();toast("✓ Canción guardada");abrir("canciones")}
+function eliminarCancionActual(){if(indiceActual<0)return;if(!confirm("¿Eliminar esta canción?"))return;const id=canciones[indiceActual].id;setlist=setlist.filter(x=>x!==id);canciones.splice(indiceActual,1);guardarDatos();indiceActual=-1;abrir("canciones")}
+function mostrarCanciones(){const q=(document.getElementById("buscarCancion").value||"").toLowerCase(),l=document.getElementById("listaCanciones");l.innerHTML="";const r=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q));if(!r.length){l.innerHTML='<div class="card">🎵 No hay canciones.</div>';return}r.forEach(({c,i})=>{l.innerHTML+=`<div class="card"><h3>🎵 ${esc(c.titulo)}</h3><div>${c.autor?`👤 ${esc(c.autor)}<br>`:""}Tonalidad: <b>${esc(c.tonalidad||"C")}</b> ${c.bpm?`<span class="badge">${c.bpm} BPM</span>`:""}</div><div class="row"><button class="fit" onclick="editarCancion(${i})">✏ Editar</button><button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button><button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button></div></div>`})}
+
+function agregarCancionSetlist(i){
+  if(!canciones[i]) return;
+  const id=asegurarId(canciones[i]);
+  if(!setlist.includes(id)){
+    setlist.push(id);
+    guardarDatos();
+    toast("✓ Canción agregada al setlist");
+    if(!document.getElementById("setlist").classList.contains("hidden")) mostrarSetlist();
+  }else{
+    toast("La canción ya está en el setlist");
+  }
+}
+
+function abrirSelectorSetlist(){
+  document.getElementById("selectorSetlist").classList.remove("hidden");
+  document.getElementById("buscarParaSetlist").value="";
+  renderSelectorSetlist();
+}
+
+function cerrarSelectorSetlist(){
+  document.getElementById("selectorSetlist").classList.add("hidden");
+}
+
+function renderSelectorSetlist(){
+  const q=(document.getElementById("buscarParaSetlist").value||"").toLowerCase();
+  const box=document.getElementById("opcionesSetlist");
+  box.innerHTML="";
+  const resultados=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q));
+
+  if(!resultados.length){
+    box.innerHTML='<div class="card">🎵 No hay canciones que coincidan.</div>';
+    return;
+  }
+
+  resultados.forEach(({c,i})=>{
+    const id=asegurarId(c);
+    const esta=setlist.includes(id);
+    box.innerHTML+=`
+      <label class="setitem" style="cursor:pointer">
+        <input type="checkbox" class="checkSetlist" value="${esc(id)}" ${esta?"disabled":""} style="width:auto;margin:0">
+        <div class="main">
+          <b>${esc(c.titulo)}</b>
+          <div class="small">${esc(c.tonalidad||"C")} ${c.bpm?`• ${c.bpm} BPM`:""} ${esta?"• Ya está en el setlist":""}</div>
+        </div>
+      </label>`;
+  });
+}
+
+function agregarSeleccionadasSetlist(){
+  const checks=[...document.querySelectorAll(".checkSetlist:checked")];
+  if(!checks.length){
+    toast("Selecciona al menos una canción");
+    return;
+  }
+
+  let agregadas=0;
+  checks.forEach(ch=>{
+    const id=ch.value;
+    if(canciones.some(c=>c.id===id) && !setlist.includes(id)){
+      setlist.push(id);
+      agregadas++;
+    }
+  });
+
+  guardarDatos();
+  cerrarSelectorSetlist();
+  mostrarSetlist();
+  toast(`✓ ${agregadas} canción${agregadas===1?"":"es"} agregada${agregadas===1?"":"s"}`);
+}
+
+function asegurarId(c){if(!c.id)c.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,8);guardarDatos();return c.id}
+function getSongById(id){return canciones.find(c=>c.id===id)}
+function mostrarSetlist(){document.getElementById("nombreSetlist").value=config.nombre||"Mi Setlist";const l=document.getElementById("listaSetlist");l.innerHTML="";let total=0;const keys=[];setlist=setlist.filter(id=>getSongById(id));setlist.forEach((id,i)=>{const c=getSongById(id);total+=Number(c?.duracion||0);if(c?.tonalidad)keys.push(c.tonalidad);l.innerHTML+=`<div class="setitem" draggable="true" data-i="${i}" ondragstart="dragStart(event,${i})" ondragover="event.preventDefault()" ondrop="dropSet(event,${i})"><div class="num">${i+1}</div><div class="main"><b>${esc(c.titulo)}</b><div class="small">${esc(c.tonalidad||"C")} ${c.bpm?`• ${c.bpm} BPM`:""}</div></div><div class="actions"><button class="fit green" onclick="abrirModoEnVivoPorId('${id}','cancion')">▶ EN VIVO</button><button class="fit secondary" onclick="moverSet(${i},-1)">↑</button><button class="fit secondary" onclick="moverSet(${i},1)">↓</button><button class="fit red" onclick="quitarSet(${i})">×</button></div></div>`});document.getElementById("setCount").textContent=setlist.length;document.getElementById("setTime").textContent=formatTime(total);document.getElementById("setKey").textContent=[...new Set(keys)].join(" / ")||"—";guardarDatos()}
+function dragStart(e,i){dragIndex=i;e.dataTransfer.effectAllowed="move"}
+function dropSet(e,i){e.preventDefault();if(dragIndex===null||dragIndex===i)return;const x=setlist.splice(dragIndex,1)[0];setlist.splice(i,0,x);dragIndex=null;guardarDatos();mostrarSetlist()}
+function moverSet(i,d){const j=i+d;if(j<0||j>=setlist.length)return;[setlist[i],setlist[j]]=[setlist[j],setlist[i]];guardarDatos();mostrarSetlist()}
+function quitarSet(i){setlist.splice(i,1);guardarDatos();mostrarSetlist()}
+function limpiarSetlist(){if(confirm("¿Vaciar el setlist?")){setlist=[];guardarDatos();mostrarSetlist()}}
+function formatTime(s){s=Math.round(Number(s)||0);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+
+function mostrarLetras(){const q=(document.getElementById("buscarLetra").value||"").toLowerCase(),l=document.getElementById("listaLetras");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach((c,i)=>{const ix=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📝 ${esc(c.titulo)}</h3><p class="small">${c.letra?"Letra guardada":"Sin letra todavía"}</p><button onclick="editarLetra(${ix})">📝 Abrir letra</button><button class="green" onclick="abrirModoEnVivo(${ix},'letra')">▶ Leer en vivo</button></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📝 No hay canciones.</div>'}
+function editarLetra(i){indiceActual=i;document.getElementById("tituloLetra").textContent=canciones[i].titulo;document.getElementById("textoLetra").value=canciones[i].letra||"";abrir("editorLetra")}
+function guardarLetra(){if(indiceActual<0)return;canciones[indiceActual].letra=document.getElementById("textoLetra").value;guardarDatos();toast("✓ Letra guardada");abrir("letras")}
+
+function mostrarCharts(){const q=(document.getElementById("buscarChart").value||"").toLowerCase(),l=document.getElementById("listaCharts");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📄 ${esc(c.titulo)}</h3><p class="small">${c.chart?"📄 "+esc(c.chartNombre||"Chart PDF"):"Sin chart todavía"}</p>${c.chart?`<button onclick="abrirPDF(${i})">👁 Abrir</button><button onclick="subirPDF(${i})">🔄 Cambiar</button><button class="red" onclick="eliminarPDF(${i})">🗑 Eliminar</button>`:`<button onclick="subirPDF(${i})">📎 Subir PDF</button>`}</div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📄 No hay canciones.</div>'}
+function subirPDF(i){const input=document.createElement("input");input.type="file";input.accept="application/pdf,.pdf";input.onchange=()=>{const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{canciones[i].chart=rd.result;canciones[i].chartNombre=f.name;guardarDatos();toast("✓ PDF guardado");mostrarCharts()};rd.readAsDataURL(f)};input.click()}
+function abrirPDF(i){
+  if(!canciones[i]?.chart){
+    alert("Esta canción no tiene PDF.");
+    return;
+  }
+
+  try{
+    if(window.AndroidPDF && typeof window.AndroidPDF.abrirPDF==="function"){
+      AndroidPDF.abrirPDF(canciones[i].chart);
+    }else{
+      alert("El visor PDF de Android no está disponible.");
+    }
+  }catch(e){
+    console.error("Error al abrir PDF:",e);
+    alert("No se pudo abrir el PDF.");
+  }
+}
+function cerrarPDF(){document.getElementById("visorPDF")?.remove()}
+function eliminarPDF(i){if(confirm("¿Eliminar el PDF?")){delete canciones[i].chart;delete canciones[i].chartNombre;guardarDatos();mostrarCharts()}}
+
+const DBNAME="SetlistMusicDB",STORE="audio";
+function db(){return new Promise((res,rej)=>{const r=indexedDB.open(DBNAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function putAudio(id,blob){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,"readwrite");tx.objectStore(STORE).put(blob,id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function getAudio(id){const d=await db();return new Promise((res,rej)=>{const r=d.transaction(STORE).objectStore(STORE).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function delAudio(id){const d=await db();return new Promise((res,rej)=>{const tx=d.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+function mostrarSecuencias(){
+    window.open(
+        'https://drive.google.com/drive/folders/1qQvyGMjwtWPqB4Cm0b7wAj3QYrI0NX2u',
+        '_blank'
+    );
+}
+async function subirAudio(i){const input=document.createElement("input");input.type="file";input.accept="audio/*";input.onchange=async()=>{const f=input.files[0];if(!f)return;const c=canciones[i];asegurarId(c);await putAudio(c.id,f);c.audioName=f.name;guardarDatos();toast("✓ Secuencia guardada");mostrarSecuencias()};input.click()}
+async function reproducirAudio(i){const c=canciones[i];const b=await getAudio(c.id);if(!b){alert("No se encontró el audio.");return}const url=URL.createObjectURL(b);const a=new Audio(url);a.controls=true;a.style.position="fixed";a.style.left="10px";a.style.right="10px";a.style.bottom="10px";a.style.zIndex=9998;document.body.appendChild(a);a.play();a.onended=()=>{URL.revokeObjectURL(url);a.remove()}}
+async function eliminarAudio(i){const c=canciones[i];if(confirm("¿Eliminar la secuencia?")){await delAudio(c.id);delete c.audioName;delete c.duracion;guardarDatos();mostrarSecuencias()}}
+
+function mostrarReferencias(){const q=(document.getElementById("buscarReferencia").value||"").toLowerCase(),l=document.getElementById("listaReferencias");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);const refs=c.referencias||[];l.innerHTML+=`<div class="card"><h3>🔗 ${esc(c.titulo)}</h3>${refs.length?refs.map((r,j)=>`<div class="ref"><b>${esc(r.nombre||"Referencia")}</b><br><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a><br><button class="red" onclick="eliminarReferencia(${i},${j})">Eliminar</button></div>`).join(""):"<p class='small'>Sin referencias</p>"}<button onclick="editarReferencia(${i})">＋ Agregar referencia</button></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">🔗 No hay canciones.</div>'}
+function editarReferencia(i){indiceActual=i;document.getElementById("tituloReferencia").textContent=canciones[i].titulo;document.getElementById("refNombre").value="";document.getElementById("refUrl").value="";abrir("editorReferencia")}
+function guardarReferencia(){const url=document.getElementById("refUrl").value.trim();if(!url){alert("Escribe una URL.");return}try{new URL(url)}catch{alert("La URL no es válida.");return}const c=canciones[indiceActual];c.referencias=c.referencias||[];c.referencias.push({nombre:document.getElementById("refNombre").value.trim()||"Referencia",url});guardarDatos();toast("✓ Referencia guardada");abrir("referencias")}
+function eliminarReferencia(i,j){canciones[i].referencias.splice(j,1);guardarDatos();mostrarReferencias()}
+
+function abrirModoEnVivo(i,tipo="cancion") {
+  try {
+    i = Number(i);
+    if (!Number.isInteger(i) || i < 0 || i >= canciones.length) {
+      toast("No se pudo abrir la canción");
+      console.error("Índice inválido para modo en vivo:", i);
+      return false;
+    }
+    const c = canciones[i];
+    indiceActual = i;
+    tonalidadTemporal = normalizarNota(c.tonalidad || "C");
+    const destino = document.getElementById("tocar");
+    if (!destino) {
+      console.error("No existe la sección #tocar");
+      toast("No se encontró el modo en vivo");
+      return false;
+    }
+    ocultarTodo();
+    destino.classList.remove("hidden");
+    const titulo = document.getElementById("tocarTitulo");
+    if (titulo) titulo.textContent = (c.titulo || "Sin título") + (c.autor ? " — " + c.autor : "");
+    actualizarTonalidadUI();
+    window.scrollTo(0,0);
+    mostrarVistaTocar(tipo);
+    return false;
+  } catch (e) {
+    console.error("Error al abrir modo en vivo:", e);
+    toast("No se pudo abrir el modo en vivo");
+    return false;
+  }
+}
+function abrirModoEnVivoPorId(id,tipo="cancion") {
+  const i = canciones.findIndex(c => String(c.id) === String(id));
+  if (i < 0) { toast("No se encontró esa canción"); return false; }
+  return abrirModoEnVivo(i,tipo);
+}
+
+function tocar(i){
+  return abrirModoEnVivo(i,"cancion");
+}
+function tocarPorId(id){
+  return abrirModoEnVivoPorId(id,"cancion");
+}
+function actualizarTonalidadUI(){const t=normalizarNota(tonalidadTemporal||"C");document.getElementById("tocarTonalidad").textContent="Tonalidad: "+t;document.getElementById("botonTonalidad").textContent="Tonalidad: "+t}
+function cambiarTonalidad(p){if(indiceActual<0)return;const pos=obtenerPosicion(tonalidadTemporal||canciones[indiceActual].tonalidad||"C");tonalidadTemporal=NOTAS[(pos+p+12)%12];actualizarTonalidadUI();mostrarVistaTocar("cancion")}
+function transponerNota(n,s){const p=obtenerPosicion(n);return p<0?n:NOTAS[(p+s+120)%12]}
+function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-G](?:#|b)?))?$/);if(!m)return a;return transponerNota(m[1],s)+(m[2]||"")+(m[3]?"/"+transponerNota(m[3],s):"")}
+function transponerTexto(txt,destino){txt=String(txt||"").replace(/\s*[-–—]\s*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
+function renderEstructuraEnVivo(c){
+  const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
+  const partes=SECCIONES.filter(([k])=>(estructura[k]||"").trim());
+  if(!partes.length)return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
+  return partes.map(([k,n])=>{
+    const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
+    return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${esc(texto)}</div></div>`;
+  }).join("");
+}
+async function mostrarVistaTocar(tipo){
+  if(indiceActual<0 || !canciones[indiceActual])return;
+  const c=canciones[indiceActual];
+  const el=document.getElementById("tocarContenido");
+  if(!el)return;
+  document.getElementById("liveAudio")?.remove();
+  if(tipo==="cancion"){el.innerHTML=renderEstructuraEnVivo(c);return;}
+  if(tipo==="letra"){el.textContent=c.letra||"📝 Esta canción todavía no tiene letra.";return;}
+  if(tipo==="chart"){if(c.chart)abrirPDF(indiceActual);else el.textContent="📄 Esta canción no tiene chart.";return;}
+  if(tipo==="referencia"){el.textContent=(c.referencias||[]).map(r=>`${r.nombre||"Referencia"}\n${r.url||""}`).join("\n\n")||"🔗 No hay referencias.";return;}
+  if(tipo==="secuencia"){
+    if(!c.audioName){el.textContent="🎧 Esta canción no tiene secuencia.";return;}
+    el.textContent="🎧 "+c.audioName+"\n\nCargando secuencia...";
+    try{
+      const b=await getAudio(c.id);
+      if(b){
+        el.textContent="🎧 "+c.audioName;
+        const a=document.createElement("audio");
+        a.id="liveAudio";a.controls=true;a.preload="metadata";a.style.width="100%";
+        a.src=URL.createObjectURL(b);
+        el.after(a);
+      }else el.textContent="🎧 No se encontró el archivo de audio en este dispositivo.";
+    }catch(e){console.error(e);el.textContent="🎧 No se pudo cargar la secuencia.";}
+  }
+}
+function abrirEditorDesdeTocar(){editarCancion(indiceActual)}
+function indiceEnSetlistActual(){
+  if(indiceActual<0 || !canciones[indiceActual]) return -1;
+  const id=canciones[indiceActual].id;
+  return setlist.indexOf(id);
+}
+function cancionAnterior(){
+  const p=indiceEnSetlistActual();
+  if(p<=0){toast("Ya estás en la primera canción");return}
+  tocarPorId(setlist[p-1]);
+}
+function cancionSiguiente(){
+  const p=indiceEnSetlistActual();
+  if(p<0 || p>=setlist.length-1){toast("Ya estás en la última canción");return}
+  tocarPorId(setlist[p+1]);
+}
+
+function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElementById("liveAudio")?.remove();cerrarPDF();volverInicio()}
+
+function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
+function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones;setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
+function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
+
+window.addEventListener("beforeunload",()=>guardarDatos());
+volverInicio();
+</script>
+</body>
+</html>

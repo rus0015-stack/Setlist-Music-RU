@@ -1,0 +1,1 @@
+This project uses android/gradlew as a self-contained Gradle launcher. It downloads Gradle 8.7 on first build when Gradle is not already installed.
