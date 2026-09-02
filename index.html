@@ -507,169 +507,148 @@ function cerrarTocar(){tonalidadTemporal=null;indiceActual=-1;document.getElemen
 
 async function exportarDatos(){
 
-try{
+  try{
 
-```
-const data = {
-  version: 5,
-  fecha: new Date().toISOString(),
+    const data = {
+      version: 5,
+      fecha: new Date().toISOString(),
 
-  canciones: canciones.map(c => ({
-    id: c.id || "",
-    titulo: c.titulo || "",
-    autor: c.autor || "",
-    tonalidad: c.tonalidad || "C",
-    bpm: c.bpm || "",
-    notas: c.notas || "",
+      canciones: canciones.map(c => ({
+        id: c.id || "",
+        titulo: c.titulo || "",
+        autor: c.autor || "",
+        tonalidad: c.tonalidad || "C",
+        bpm: c.bpm || "",
+        notas: c.notas || "",
 
-    estructura: c.estructura || {},
-    contenido: c.contenido || "",
+        estructura: c.estructura || {},
+        contenido: c.contenido || "",
 
-    letra: c.letra || "",
+        letra: c.letra || "",
 
-    referencias: Array.isArray(c.referencias)
-      ? c.referencias
-      : [],
+        referencias: Array.isArray(c.referencias)
+          ? c.referencias
+          : [],
 
-    chart: c.chart || null,
-    chartNombre: c.chartNombre || null
-  })),
+        chart: c.chart || null,
+        chartNombre: c.chartNombre || null
+      })),
 
-  setlist: Array.isArray(setlist)
-    ? [...setlist]
-    : [],
+      setlist: Array.isArray(setlist)
+        ? [...setlist]
+        : [],
 
-  config: config || {
-    nombre: "Mi Setlist"
-  }
-};
-
-const json = JSON.stringify(data, null, 2);
-
-const archivo = new File(
-  [json],
-  "Setlist_Music_backup.json",
-  {
-    type: "application/json"
-  }
-);
-
-
-/* ==========================================
-   MÉTODO 1 — GUARDAR DIRECTAMENTE
-   PC / CHROME COMPATIBLE
-   ========================================== */
-
-if(typeof window.showSaveFilePicker === "function"){
-
-  const handle = await window.showSaveFilePicker({
-
-    suggestedName: "Setlist_Music_backup.json",
-
-    types: [
-      {
-        description: "Archivo JSON",
-        accept: {
-          "application/json": [".json"]
-        }
+      config: config || {
+        nombre: "Mi Setlist"
       }
-    ]
+    };
 
-  });
+    const json = JSON.stringify(data, null, 2);
 
-  const writable = await handle.createWritable();
+    const archivo = new File(
+      [json],
+      "Setlist_Music_backup.json",
+      {
+        type: "application/json"
+      }
+    );
 
-  await writable.write(json);
+    /*
+     * ANDROID / CHROME / PWA
+     * Compartir y guardar el archivo
+     */
 
-  await writable.close();
+    if(
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({files:[archivo]})
+    ){
 
-  toast("✓ Copia de seguridad guardada");
+      await navigator.share({
+        files: [archivo],
+        title: "Setlist Music",
+        text: "Copia de seguridad de Setlist Music"
+      });
 
-  return;
-}
+      toast("✓ Copia de seguridad preparada");
+      return;
+    }
 
+    /*
+     * PC / NAVEGADORES COMPATIBLES
+     */
 
-/* ==========================================
-   MÉTODO 2 — ANDROID / PWA
-   COMPARTIR / GUARDAR ARCHIVO
-   ========================================== */
+    if(typeof window.showSaveFilePicker === "function"){
 
-if(
-  typeof navigator.share === "function" &&
-  typeof navigator.canShare === "function" &&
-  navigator.canShare({files: [archivo]})
-){
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "Setlist_Music_backup.json",
+        types: [
+          {
+            description: "Archivo JSON",
+            accept: {
+              "application/json": [".json"]
+            }
+          }
+        ]
+      });
 
-  await navigator.share({
+      const writable = await handle.createWritable();
 
-    files: [archivo],
+      await writable.write(json);
 
-    title: "Setlist Music",
+      await writable.close();
 
-    text: "Copia de seguridad de Setlist Music"
+      toast("✓ Copia de seguridad guardada");
+      return;
+    }
 
-  });
+    /*
+     * ÚLTIMO MÉTODO DE RESPALDO
+     */
 
-  toast("✓ Copia de seguridad lista");
+    const blob = new Blob(
+      [json],
+      {type:"application/json"}
+    );
 
-  return;
-}
+    const url = URL.createObjectURL(blob);
 
+    const enlace = document.createElement("a");
 
-/* ==========================================
-   MÉTODO 3 — DESCARGA DE EMERGENCIA
-   ========================================== */
+    enlace.href = url;
+    enlace.download = "Setlist_Music_backup.json";
 
-const blob = new Blob(
-  [json],
-  {
-    type: "application/json;charset=utf-8"
+    enlace.style.display = "none";
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    setTimeout(function(){
+      URL.revokeObjectURL(url);
+    },3000);
+
+    toast("✓ JSON exportado");
+
+  }catch(error){
+
+    console.error("ERROR EXPORTANDO:",error);
+
+    if(error && error.name === "AbortError"){
+      return;
+    }
+
+    alert(
+      "No se pudo guardar la copia de seguridad.\n\n" +
+      "Error: " +
+      (error.message || error)
+    );
+
   }
-);
-
-const url = URL.createObjectURL(blob);
-
-const enlace = document.createElement("a");
-
-enlace.href = url;
-
-enlace.download = "Setlist_Music_backup.json";
-
-enlace.style.display = "none";
-
-document.body.appendChild(enlace);
-
-enlace.click();
-
-document.body.removeChild(enlace);
-
-setTimeout(() => {
-  URL.revokeObjectURL(url);
-}, 3000);
-
-toast("✓ JSON exportado");
-```
-
-}catch(error){
-
-```
-console.error("ERROR EXPORTANDO:", error);
-
-if(error && error.name === "AbortError"){
-  return;
-}
-
-alert(
-  "No se pudo guardar la copia de seguridad.\n\n" +
-  "Error: " +
-  (error.message || error)
-);
-```
 
 }
-
-}
-
 function importarDatos(input){
 
   const archivo = input.files && input.files[0];
