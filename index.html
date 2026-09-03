@@ -542,9 +542,36 @@ function limpiarSetlist(){if(confirm("¿Vaciar el setlist?")){setlist=[];guardar
 function formatTime(s){s=Math.round(Number(s)||0);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
 
 function mostrarLetras(){const q=(document.getElementById("buscarLetra").value||"").toLowerCase(),l=document.getElementById("listaLetras");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach((c,i)=>{const ix=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📝 ${esc(c.titulo)}</h3><p class="small">${c.letra?"Letra guardada":"Sin letra todavía"}</p><button onclick="editarLetra(${ix})">📝 Abrir letra</button><button class="green" onclick="abrirModoEnVivo(${ix},'letra')">▶ Leer en vivo</button></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📝 No hay canciones.</div>'}
-function editarLetra(i){indiceActual=i;document.getElementById("tituloLetra").textContent=canciones[i].titulo;document.getElementById("textoLetra").value=canciones[i].letra||"";abrir("editorLetra")}
-function guardarLetra(){if(indiceActual<0)return;canciones[indiceActual].letra=document.getElementById("textoLetra").value;guardarDatos();toast("✓ Letra guardada");abrir("letras")}
+function editarLetra(i){
+  indiceActual=i;
 
+  document.getElementById("tituloLetra").textContent=
+    canciones[i].titulo;
+
+  document.getElementById("textoLetra").value=
+    (canciones[i].letra||"").toUpperCase();
+
+  abrir("editorLetra");
+}
+function guardarLetra(){
+
+  if(indiceActual<0)return;
+
+  const campo =
+    document.getElementById("textoLetra");
+
+  canciones[indiceActual].letra =
+    (campo.value || "").toUpperCase();
+
+  campo.value =
+    canciones[indiceActual].letra;
+
+  guardarDatos();
+
+  toast("✓ Letra guardada en MAYÚSCULAS");
+
+  abrir("letras");
+}
 function mostrarCharts(){const q=(document.getElementById("buscarChart").value||"").toLowerCase(),l=document.getElementById("listaCharts");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📄 ${esc(c.titulo)}</h3><p class="small">${c.chart?"📄 "+esc(c.chartNombre||"Chart PDF"):"Sin chart todavía"}</p>${c.chart?`<button onclick="abrirPDF(${i})">👁 Abrir</button><button onclick="subirPDF(${i})">🔄 Cambiar</button><button class="red" onclick="eliminarPDF(${i})">🗑 Eliminar</button>`:`<button onclick="subirPDF(${i})">📎 Subir PDF</button>`}</div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📄 No hay canciones.</div>'}
 function subirPDF(i){const input=document.createElement("input");input.type="file";input.accept="application/pdf,.pdf";input.onchange=()=>{const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{canciones[i].chart=rd.result;canciones[i].chartNombre=f.name;guardarDatos();toast("✓ PDF guardado");mostrarCharts()};rd.readAsDataURL(f)};input.click()}
 function abrirPDF(i){
