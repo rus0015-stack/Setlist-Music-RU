@@ -28,12 +28,37 @@ jobs:
         run: |
           cp index.html android/app/src/main/assets/index.html
 
-      - name: Verificar index.html copiado
+            - name: Verificar index.html copiado
         run: |
           echo "Verificando index.html..."
           ls -lh index.html
           ls -lh android/app/src/main/assets/index.html
-          grep -q "PRUEBA" android/app/src/main/assets/index.html && echo "OK: PRUEBA encontrada" || echo "AVISO: PRUEBA no encontrada"
+          cmp index.html android/app/src/main/assets/index.html
+          echo "OK: index.html copiado exactamente"
+
+      - name: Dar permisos al Gradle Wrapper
+        working-directory: android
+        run: chmod +x gradlew
+
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Guardar APK como Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Setlist-Music-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Publicar APK en Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v5.0.${{ github.run_number }}" \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            --title "Setlist Music v5.0.${{ github.run_number }}" \
+            --notes "APK generado automáticamente con el index.html actualizado."
 
       - name: Dar permisos al Gradle Wrapper
         working-directory: android
