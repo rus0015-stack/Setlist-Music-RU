@@ -756,6 +756,33 @@ function exportarDatos(){
 
     const texto = JSON.stringify(datos, null, 2);
 
+
+    /*
+     * ANDROID
+     *
+     * Si estamos dentro del APK,
+     * guardar directamente en Descargas.
+     */
+    if (
+      window.AndroidPDF &&
+      typeof window.AndroidPDF.exportarJSON === "function"
+    ) {
+
+      window.AndroidPDF.exportarJSON(
+        texto,
+        "Setlist_Music_backup.json"
+      );
+
+      return;
+    }
+
+
+    /*
+     * NAVEGADOR / PWA
+     *
+     * Si no existe el puente Android,
+     * utilizar la descarga normal.
+     */
     const blob = new Blob(
       [texto],
       {
@@ -764,18 +791,31 @@ function exportarDatos(){
     );
 
 
-    const url = URL.createObjectURL(blob);
+    const url =
+      URL.createObjectURL(blob);
 
-    const enlace = document.createElement("a");
+
+    const enlace =
+      document.createElement("a");
+
 
     enlace.href = url;
-    enlace.download = "Setlist_Music_backup.json";
 
-    document.body.appendChild(enlace);
+    enlace.download =
+      "Setlist_Music_backup.json";
+
+
+    document.body.appendChild(
+      enlace
+    );
+
 
     enlace.click();
 
-    document.body.removeChild(enlace);
+
+    document.body.removeChild(
+      enlace
+    );
 
 
     setTimeout(function(){
@@ -785,12 +825,17 @@ function exportarDatos(){
     }, 2000);
 
 
-    toast("✓ Copia JSON exportada");
+    toast(
+      "✓ Copia JSON exportada"
+    );
 
 
   } catch(error) {
 
-    console.error("ERROR EXPORTANDO JSON:", error);
+    console.error(
+      "ERROR EXPORTANDO JSON:",
+      error
+    );
 
     alert(
       "ERROR AL EXPORTAR:\n\n" +
