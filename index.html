@@ -29,6 +29,51 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{min-height:46px;height:46px;margin:0;padding:8px;font-size:16px}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
 #visorPDF{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column}.pdfbar{background:var(--panel);padding:10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.pdfbar strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pdfbar button{flex:0 0 auto}#pdfFrame{flex:1;width:100%;border:0;background:white}#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--txt);border:1px solid var(--line);padding:11px 15px;border-radius:12px;z-index:10000;display:none;box-shadow:var(--shadow)}
 @media(max-width:700px){header{padding-right:110px}.theme-control{right:10px;top:18px}.tabs{grid-template-columns:repeat(3,1fr)}.tocar-pre{font-size:19px}.stat{grid-template-columns:1fr 1fr}.setitem .actions{flex-wrap:wrap}.container{padding:12px;padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px))}.editor-actions{bottom:calc(8px + env(safe-area-inset-bottom, 0px));padding:9px;margin-top:12px}.editor-actions button{flex:1;min-width:0}}
+
+/* CONTROLES DE LETRA EN VIVO */
+.letra-controles{
+  display:none;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+  padding:8px;
+  border-radius:12px;
+  background:var(--panel);
+  border:1px solid var(--border);
+}
+
+.letra-controles.visible{
+  display:flex;
+}
+
+.letra-controles button{
+  min-width:48px;
+  min-height:42px;
+  font-size:18px;
+  font-weight:700;
+}
+
+.letra-controles .letra-tamano{
+  min-width:68px;
+}
+
+.letra-controles select{
+  min-height:42px;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  color:var(--text);
+  font-size:14px;
+}
+
+.tocar-pre.letra-vivo{
+  line-height:1.6;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+</style>
 </style>
 </head>
 <body>
@@ -178,7 +223,52 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
     <button onclick="mostrarVistaTocar('referencia')">🔗 Ref.</button>
     <button onclick="abrirEditorDesdeTocar()">✏ Editar</button>
   </div>
-  <div class="card"><pre id="tocarContenido" class="tocar-pre"></pre></div>
+  <div class="card">
+
+  <div id="letraControles" class="letra-controles">
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="cambiarTamanoLetra(-2)"
+      title="Reducir tamaño">
+      A−
+    </button>
+
+    <button
+      type="button"
+      class="secondary letra-tamano"
+      onclick="restablecerTamanoLetra()"
+      id="letraTamano">
+      100%
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="cambiarTamanoLetra(2)"
+      title="Aumentar tamaño">
+      A+
+    </button>
+
+    <select
+      id="letraFuente"
+      onchange="cambiarFuenteLetra(this.value)"
+      title="Tipo de letra">
+
+      <option value="system">Sans</option>
+      <option value="serif">Serif</option>
+      <option value="mono">Monospace</option>
+      <option value="verdana">Verdana</option>
+      <option value="georgia">Georgia</option>
+
+    </select>
+
+  </div>
+
+  <pre id="tocarContenido" class="tocar-pre"></pre>
+
+</div>
 </section>
 
 <section id="ajustes" class="hidden">
