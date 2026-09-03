@@ -282,10 +282,6 @@ Las secuencias de audio no se incluyen en la copia de seguridad.
     <button type="button" class="green" onclick="exportarDatos()">
   ⬇ Exportar JSON
 </button>
-
-<button type="button" onclick="alert('EL BOTÓN FUNCIONA')">
-  🧪 PRUEBA
-</button>
     <button onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
     <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importarDatos(this)">
   </div>
@@ -309,7 +305,94 @@ let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
 let setlist=JSON.parse(localStorage.getItem("setlist")||"[]");
 let config=JSON.parse(localStorage.getItem("setlistConfig")||'{"nombre":"Mi Setlist"}');
 let indiceActual=-1,tonalidadTemporal=null,dragIndex=null;
+let configuracionLetra={
+  tamano:Number(localStorage.getItem("letraTamano"))||22,
+  fuente:localStorage.getItem("letraFuente")||"system"
+};
 
+const FUENTES_LETRA={
+  system:'Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+  serif:'Georgia,"Times New Roman",serif',
+  mono:'"Courier New",Courier,monospace',
+  verdana:'Verdana,Arial,sans-serif',
+  georgia:'Georgia,"Times New Roman",serif'
+};
+
+function aplicarConfiguracionLetra(){
+
+  const contenido=document.getElementById("tocarContenido");
+  const tamano=document.getElementById("letraTamano");
+  const fuente=document.getElementById("letraFuente");
+
+  if(!contenido)return;
+
+  contenido.style.fontSize=configuracionLetra.tamano+"px";
+
+  contenido.style.fontFamily=
+    FUENTES_LETRA[configuracionLetra.fuente]||
+    FUENTES_LETRA.system;
+
+  if(tamano){
+
+    const porcentaje=Math.round(
+      (configuracionLetra.tamano/22)*100
+    );
+
+    tamano.textContent=porcentaje+"%";
+  }
+
+  if(fuente){
+    fuente.value=configuracionLetra.fuente;
+  }
+}
+
+function cambiarTamanoLetra(cambio){
+
+  configuracionLetra.tamano+=Number(cambio)||0;
+
+  if(configuracionLetra.tamano<14){
+    configuracionLetra.tamano=14;
+  }
+
+  if(configuracionLetra.tamano>42){
+    configuracionLetra.tamano=42;
+  }
+
+  localStorage.setItem(
+    "letraTamano",
+    configuracionLetra.tamano
+  );
+
+  aplicarConfiguracionLetra();
+}
+
+function restablecerTamanoLetra(){
+
+  configuracionLetra.tamano=22;
+
+  localStorage.setItem(
+    "letraTamano",
+    "22"
+  );
+
+  aplicarConfiguracionLetra();
+}
+
+function cambiarFuenteLetra(fuente){
+
+  if(!FUENTES_LETRA[fuente]){
+    fuente="system";
+  }
+
+  configuracionLetra.fuente=fuente;
+
+  localStorage.setItem(
+    "letraFuente",
+    fuente
+  );
+
+  aplicarConfiguracionLetra();
+}
 /* Migración: todas las canciones deben tener un ID estable. */
 let datosMigrados=false;
 canciones.forEach(c=>{
@@ -560,8 +643,35 @@ async function mostrarVistaTocar(tipo){
   const el=document.getElementById("tocarContenido");
   if(!el)return;
   document.getElementById("liveAudio")?.remove();
-  if(tipo==="cancion"){el.innerHTML=renderEstructuraEnVivo(c);return;}
-  if(tipo==="letra"){el.textContent=c.letra||"📝 Esta canción todavía no tiene letra.";return;}
+  if(tipo==="cancion"){
+
+  document.getElementById("letraControles")?.classList.remove("visible");
+
+  el.classList.remove("letra-vivo");
+
+  el.innerHTML=renderEstructuraEnVivo(c);
+
+  return;
+}
+
+if(tipo==="letra"){
+
+  const controles=document.getElementById("letraControles");
+
+  if(controles){
+    controles.classList.add("visible");
+  }
+
+  el.classList.add("letra-vivo");
+
+  el.textContent=
+    c.letra||
+    "📝 Esta canción todavía no tiene letra.";
+
+  aplicarConfiguracionLetra();
+
+  return;
+}
   if(tipo==="chart"){if(c.chart)abrirPDF(indiceActual);else el.textContent="📄 Esta canción no tiene chart.";return;}
   if(tipo==="referencia"){el.textContent=(c.referencias||[]).map(r=>`${r.nombre||"Referencia"}\n${r.url||""}`).join("\n\n")||"🔗 No hay referencias.";return;}
   if(tipo==="secuencia"){
