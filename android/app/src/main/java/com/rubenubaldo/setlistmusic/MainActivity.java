@@ -1,14 +1,17 @@
 package com.rubenubaldo.setlistmusic;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -29,6 +32,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
@@ -109,11 +114,17 @@ public class MainActivity extends Activity {
 
 
     /**
-     * Puente entre JavaScript y Android
-     * para visualizar PDFs.
+     * Puente entre JavaScript y Android.
+     *
+     * Permite:
+     * - Abrir PDFs.
+     * - Guardar copias JSON en Descargas.
      */
     public class PDFInterface {
 
+        /**
+         * ABRIR PDF
+         */
         @JavascriptInterface
         public void abrirPDF(String base64) {
 
@@ -161,6 +172,203 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
             });
+        }
+
+
+        /**
+         * EXPORTAR JSON A DESCARGAS
+         */
+        @JavascriptInterface
+        public void exportarJSON(
+                String contenido,
+                String nombreArchivo) {
+
+            try {
+
+                if (contenido == null || contenido.isEmpty()) {
+
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "El JSON está vacío",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                    );
+
+                    return;
+                }
+
+
+                if (nombreArchivo == null
+                        || nombreArchivo.trim().isEmpty()) {
+
+                    nombreArchivo =
+                            "Setlist_Music_backup.json";
+                }
+
+
+                /*
+                 * ANDROID 10 O SUPERIOR
+                 *
+                 * Se utiliza MediaStore para guardar
+                 * directamente en Descargas.
+                 */
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                    ContentValues values =
+                            new ContentValues();
+
+                    values.put(
+                            MediaStore.Downloads.DISPLAY_NAME,
+                            nombreArchivo
+                    );
+
+                    values.put(
+                            MediaStore.Downloads.MIME_TYPE,
+                            "application/json"
+                    );
+
+                    values.put(
+                            MediaStore.Downloads.RELATIVE_PATH,
+                            Environment.DIRECTORY_DOWNLOADS
+                    );
+
+                    values.put(
+                            MediaStore.Downloads.IS_PENDING,
+                            1
+                    );
+
+
+                    Uri uri =
+                            getContentResolver().insert(
+                                    MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                                    values
+                            );
+
+
+                    if (uri == null) {
+
+                        throw new Exception(
+                                "No se pudo crear el archivo en Descargas."
+                        );
+                    }
+
+
+                    try (
+                            OutputStream salida =
+                                    getContentResolver()
+                                            .openOutputStream(uri)
+                    ) {
+
+                        if (salida == null) {
+
+                            throw new Exception(
+                                    "No se pudo abrir el archivo."
+                            );
+                        }
+
+                        salida.write(
+                                contenido.getBytes(
+                                        StandardCharsets.UTF_8
+                                )
+                        );
+
+                        salida.flush();
+                    }
+
+
+                    ContentValues terminado =
+                            new ContentValues();
+
+                    terminado.put(
+                            MediaStore.Downloads.IS_PENDING,
+                            0
+                    );
+
+                    getContentResolver().update(
+                            uri,
+                            terminado,
+                            null,
+                            null
+                    );
+
+
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "✓ JSON guardado en Descargas",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                    );
+
+                } else {
+
+                    /*
+                     * ANDROID 9 O ANTERIOR
+                     */
+                    File carpeta =
+                            Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOWNLOADS
+                            );
+
+                    if (!carpeta.exists()) {
+                        carpeta.mkdirs();
+                    }
+
+
+                    File archivo =
+                            new File(
+                                    carpeta,
+                                    nombreArchivo
+                            );
+
+
+                    FileOutputStream salida =
+                            new FileOutputStream(archivo);
+
+                    salida.write(
+                            contenido.getBytes(
+                                    StandardCharsets.UTF_8
+                            )
+                    );
+
+                    salida.flush();
+                    salida.close();
+
+
+                    runOnUiThread(() ->
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "✓ JSON guardado en Descargas",
+                                    Toast.LENGTH_LONG
+                            ).show()
+                    );
+                }
+
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+                String mensaje =
+                        e.getMessage();
+
+                if (mensaje == null) {
+                    mensaje = "Error desconocido";
+                }
+
+                final String errorFinal =
+                        mensaje;
+
+                runOnUiThread(() ->
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Error al guardar JSON: "
+                                        + errorFinal,
+                                Toast.LENGTH_LONG
+                        ).show()
+                );
+            }
         }
     }
 
@@ -606,7 +814,6 @@ public class MainActivity extends Activity {
 
 
             switch (event.getActionMasked()) {
-
 
                 case MotionEvent.ACTION_DOWN:
 
