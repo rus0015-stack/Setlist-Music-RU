@@ -463,7 +463,94 @@ function volverInicio(){
 function guardarNombreSetlist(){config.nombre=document.getElementById("nombreSetlist").value.trim()||"Mi Setlist";guardarDatos();toast("✓ Nombre guardado")}
 function normalizarNota(n){return EQUIVALENCIAS[n]||n}
 function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
-function normalizarAcordesTexto(texto){if(!texto)return "";let t=String(texto).replace(/\s*[-–—]\s*/g," | ");const patron=/(^|[\s|([\{,:;])([a-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?=$|[\s|)\]\},:;.])/g;return t.replace(patron,(m,a,n,al,q)=>a+n.toUpperCase()+(al||"")+(q||""))}
+function normalizarAcordesTexto(texto){
+  if(!texto)return "";
+
+  let t=String(texto)
+    .replace(/\r?\n/g," ")
+    .replace(/\s*[-–—]\s*/g," | ")
+    .replace(/\s*\|\s*/g," | ")
+    .trim();
+
+  const tokens=t.split(/\s+/);
+  const acordes=[];
+
+  const patron=/^([A-Ga-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-Ga-g])([#b]?))?$/;
+
+  for(let token of tokens){
+
+    if(token==="|"){
+      if(acordes.length && acordes[acordes.length-1]!=="|"){
+        acordes.push("|");
+      }
+      continue;
+    }
+
+    /* Permite escribir "A sus4", "D 7", etc. */
+    if(
+      acordes.length &&
+      /^(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)$/i.test(token)
+    ){
+      const anterior=acordes[acordes.length-1];
+
+      if(anterior && anterior!=="|"){
+        acordes[acordes.length-1]=anterior+token.toLowerCase();
+        continue;
+      }
+    }
+
+    const limpio=token.replace(/[.,;]+$/,"");
+
+    if(patron.test(limpio)){
+      const m=limpio.match(patron);
+
+      let acorde=
+        m[1].toUpperCase()+
+        (m[2]||"")+
+        (m[3]||"");
+
+      if(m[4]){
+        acorde+="/"+
+        m[4].toUpperCase()+
+        (m[5]||"");
+      }
+
+      acordes.push(acorde);
+    }else{
+      acordes.push(limpio);
+    }
+  }
+
+  /* Separar automáticamente acordes escritos con espacios */
+  let resultado=[];
+  for(let i=0;i<acordes.length;i++){
+    const actual=acordes[i];
+
+    if(actual==="|"){
+      if(resultado.length && resultado[resultado.length-1]!=="|"){
+        resultado.push("|");
+      }
+      continue;
+    }
+
+    if(
+      resultado.length &&
+      resultado[resultado.length-1]!=="|" &&
+      patron.test(actual)
+    ){
+      resultado.push("|");
+    }
+
+    resultado.push(actual);
+  }
+
+  return resultado
+    .join(" ")
+    .replace(/\s*\|\s*/g," | ")
+    .replace(/(?:\s*\|\s*)+/g," | ")
+    .replace(/^ \| | \| $/g,"")
+    .trim();
+}
 function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card";d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="1" placeholder="Ej.: D | A | Bm | G">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value)});boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\\s)\\|\\s*$/.test(antes)||/^\\s*\\|(?:\\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
 function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
