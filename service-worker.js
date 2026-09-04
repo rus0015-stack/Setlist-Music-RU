@@ -1,11 +1,11 @@
-const CACHE = 'setlist-music-v5-0';
+const CACHE = 'setlist-music-v5-1';
 
 const CORE = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', event => {
