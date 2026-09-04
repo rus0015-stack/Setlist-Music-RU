@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Descargar proyecto
         uses: actions/checkout@v4
 
@@ -24,17 +23,21 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Copiar index.html actualizado al APK
+      - name: Copiar archivos web actualizados al APK
         run: |
           cp index.html android/app/src/main/assets/index.html
+          cp logo-ruben-ubaldo-blanco.png android/app/src/main/assets/logo-ruben-ubaldo-blanco.png
+          cp icon-192.png android/app/src/main/assets/icon-192.png
+          cp icon-512.png android/app/src/main/assets/icon-512.png
 
-      - name: Verificar index.html copiado
+      - name: Verificar archivos copiados
         run: |
-          echo "Verificando index.html..."
-          ls -lh index.html
+          echo "Verificando archivos..."
           ls -lh android/app/src/main/assets/index.html
-          cmp index.html android/app/src/main/assets/index.html
-          echo "OK: index.html copiado exactamente"
+          ls -lh android/app/src/main/assets/logo-ruben-ubaldo-blanco.png
+          ls -lh android/app/src/main/assets/icon-192.png
+          ls -lh android/app/src/main/assets/icon-512.png
+          echo "OK: archivos web copiados al APK"
 
       - name: Dar permisos al Gradle Wrapper
         working-directory: android
