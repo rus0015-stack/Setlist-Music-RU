@@ -450,14 +450,51 @@ function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="")
 
 function nuevaCancion(){indiceActual=-1;["titulo","autor","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
 function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
-function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura()};n.contenido=estructuraAContenido(n.estructura);if(indiceActual<0){
-  n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-  canciones.push(n);
-}else{
-  n.id=canciones[indiceActual].id || "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-  canciones[indiceActual]=n;
+function guardarCancion(){
+  const titulo=document.getElementById("titulo").value.trim();
+
+  if(!titulo){
+    alert("Escribe el nombre de la canción.");
+    return;
+  }
+
+  const anterior=indiceActual>=0?canciones[indiceActual]:{};
+
+  const estructura=obtenerEstructura();
+
+  // FORZAR NORMALIZACIÓN DE ACORDES AL GUARDAR
+  SECCIONES.forEach(([k])=>{
+    estructura[k]=normalizarAcordesTexto(estructura[k]||"");
+  });
+
+  const n={
+    ...anterior,
+    titulo,
+    autor:document.getElementById("autor").value.trim(),
+    tonalidad:document.getElementById("tonalidad").value,
+    bpm:document.getElementById("bpm").value
+      ?Number(document.getElementById("bpm").value)
+      :"",
+    notas:document.getElementById("notasCancion").value,
+    estructura
+  };
+
+  n.contenido=estructuraAContenido(n.estructura);
+
+  if(indiceActual<0){
+    n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+    canciones.push(n);
+  }else{
+    n.id=canciones[indiceActual].id ||
+      "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+
+    canciones[indiceActual]=n;
+  }
+
+  guardarDatos();
+  toast("✓ Canción guardada con acordes separados");
+  abrir("canciones");
 }
-guardarDatos();toast("✓ Canción guardada");abrir("canciones")}
 function eliminarCancionActual(){if(indiceActual<0)return;if(!confirm("¿Eliminar esta canción?"))return;const id=canciones[indiceActual].id;setlist=setlist.filter(x=>x!==id);canciones.splice(indiceActual,1);guardarDatos();indiceActual=-1;abrir("canciones")}
 function mostrarCanciones(){const q=(document.getElementById("buscarCancion").value||"").toLowerCase(),l=document.getElementById("listaCanciones");l.innerHTML="";const r=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q));if(!r.length){l.innerHTML='<div class="card">🎵 No hay canciones.</div>';return}r.forEach(({c,i})=>{l.innerHTML+=`<div class="card"><h3>🎵 ${esc(c.titulo)}</h3><div>${c.autor?`👤 ${esc(c.autor)}<br>`:""}Tonalidad: <b>${esc(c.tonalidad||"C")}</b> ${c.bpm?`<span class="badge">${c.bpm} BPM</span>`:""}</div><div class="row"><button class="fit" onclick="editarCancion(${i})">✏ Editar</button><button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button><button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button></div></div>`})}
 
