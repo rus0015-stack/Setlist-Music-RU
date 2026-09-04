@@ -29,6 +29,7 @@ jobs:
           cp logo-ruben-ubaldo-blanco.png android/app/src/main/assets/logo-ruben-ubaldo-blanco.png
           cp icon-192.png android/app/src/main/assets/icon-192.png
           cp icon-512.png android/app/src/main/assets/icon-512.png
+          cp icon-512.png android/app/src/main/res/drawable/icon_512.png
 
       - name: Verificar archivos copiados
         run: |
