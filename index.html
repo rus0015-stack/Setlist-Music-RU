@@ -98,12 +98,86 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   border-radius:10px;
   box-sizing:border-box;
 }
-</style>
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.brand-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  flex: 0 0 58px;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text h1 {
+  font-size: 22px;
+  margin: 0 0 2px;
+}
+
+.brand-text p {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  header {
+    padding: 18px 100px 14px 12px;
+  }
+
+  .brand-lockup {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .brand-text h1 {
+    font-size: 17px;
+  }
+
+  .brand-text .brand-by {
+    font-size: 12px !important;
+  }
+
+  .brand-text p:last-child {
+    font-size: 10px;
+  }
+}
+
+  
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><h1>🎵 Setlist Music</h1><p class="brand-by">By Rubén Ubaldo</p><p>Tu música para tocar en vivo</p></div>
+  
+<header>
+  <div class="brand">
+    <div class="brand-lockup">
+      <img
+        src="logo-ruben-ubaldo-blanco.png"
+        alt="Logo Rubén Ubaldo"
+        class="brand-logo"
+      >
+      <div class="brand-text">
+        <h1>🎵 Setlist Music</h1>
+        <p class="brand-by">By Rubén Ubaldo</p>
+        <p>Tu música para tocar en vivo</p>
+      </div>
+    </div>
+  </div>
+
   <div class="theme-control" aria-label="Apariencia">
     <button id="themeLight" onclick="setTheme('light')" title="Modo claro">☀️</button>
     <button id="themeDark" onclick="setTheme('dark')" title="Modo oscuro">🌙</button>
@@ -111,12 +185,11 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   </div>
 </header>
 
+</header>
+
 <div class="container">
 
 <section id="inicio">
-  <div class="logo-ru-principal">
-  <img src="logo-ruben-ubaldo-blanco.png" alt="Rubén Ubaldo">
-</div>
   <div class="card">
     <div class="row">
       <div><b>🎤 SETLIST — MODO DIRECTO</b><div class="small">Organiza el orden de tu presentación y entra al modo en vivo desde cada canción.</div></div>
