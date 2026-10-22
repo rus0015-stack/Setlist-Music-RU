@@ -1,5 +1,6 @@
 package com.rubenubaldo.setlistmusic;
 
+import android.view.ViewParent;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -191,9 +192,17 @@ public class MainActivity extends Activity {
                 page.close();
 
                 ZoomImageView imagen = new ZoomImageView(this);
-                imagen.setImageBitmap(bitmap);
-                imagen.setAdjustViewBounds(true);
-                imagen.setScaleType(ImageView.ScaleType.FIT_CENTER);
+imagen.setImageBitmap(bitmap);
+imagen.setScaleType(ImageView.ScaleType.FIT_CENTER);
+imagen.setAdjustViewBounds(true);
+imagen.setPadding(0, 0, 0, 0);
+
+imagen.setLayoutParams(
+    new LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT
+    )
+);
 
                 LinearLayout.LayoutParams parametros =
                         new LinearLayout.LayoutParams(
@@ -321,19 +330,28 @@ private class ZoomImageView extends ImageView {
     }
 
     
+
 @Override
 public boolean onTouchEvent(MotionEvent event) {
     detector.onTouchEvent(event);
 
-    // Si hay zoom, la imagen controla el gesto.
-    if (escala > 1.0f || detector.isInProgress()) {
-        return true;
+    // Sin zoom, el ScrollView puede desplazar las páginas.
+    if (escala <= 1.0f && !detector.isInProgress()) {
+        ViewParent padre = getParent();
+        if (padre != null) {
+            padre.requestDisallowInterceptTouchEvent(false);
+        }
+    } else {
+        // Con zoom, conserva los gestos para ampliar la imagen.
+        ViewParent padre = getParent();
+        if (padre != null) {
+            padre.requestDisallowInterceptTouchEvent(true);
+        }
     }
 
-    // Sin zoom, permite que el ScrollView
-    // reciba el gesto para recorrer las páginas.
-    return false;
+    return true;
 }
+
 
 }
     private void cerrarPDFAndroid() {
