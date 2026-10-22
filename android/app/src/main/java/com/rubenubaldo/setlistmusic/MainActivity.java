@@ -1,5 +1,7 @@
 package com.rubenubaldo.setlistmusic;
 
+import android.content.Context;
+import android.view.ViewParent;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -698,289 +700,150 @@ public class MainActivity extends Activity {
      * - Arrastre vertical.
      * - Zoom máximo 4x.
      */
-    private class ZoomImageView extends ImageView {
+    
+private class ZoomImageView extends ImageView {
 
-        private float escala = 1.0f;
+    private float escala = 1.0f;
+    private float ultimaX;
+    private float ultimaY;
+    private float desplazamientoX = 0f;
+    private float desplazamientoY = 0f;
 
-        private float escalaAnterior = 1.0f;
+    private ScaleGestureDetector detector;
 
-        private float ultimaX;
-        private float ultimaY;
+    public ZoomImageView(Context context) {
+        super(context);
 
-        private float desplazamientoX = 0;
-        private float desplazamientoY = 0;
+        setScaleType(ImageView.ScaleType.FIT_CENTER);
+        setAdjustViewBounds(true);
+        setClickable(true);
 
-        private ScaleGestureDetector detector;
+        detector = new ScaleGestureDetector(
+                context,
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
-        private boolean moviendo = false;
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detectorEscala) {
 
+                        escala *= detectorEscala.getScaleFactor();
 
-        public ZoomImageView(
-                android.content.Context context) {
+                        // Limitar el zoom para evitar ampliaciones excesivas.
+                        escala = Math.max(1.0f, Math.min(4.0f, escala));
 
-            super(context);
+                        setScaleX(escala);
+                        setScaleY(escala);
 
-            setAdjustViewBounds(
-                    true
-            );
+                        if (escala <= 1.0f) {
+                            escala = 1.0f;
+                            desplazamientoX = 0f;
+                            desplazamientoY = 0f;
 
-            setScaleType(
-                    ImageView.ScaleType.FIT_CENTER
-            );
-
-
-            /*
-             * DETECTOR DE ZOOM
-             */
-            detector =
-                    new ScaleGestureDetector(
-                            context,
-                            new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
-                                @Override
-                                public boolean onScaleBegin(
-                                        ScaleGestureDetector detector) {
-
-                                    escalaAnterior =
-                                            escala;
-
-                                    return true;
-                                }
-
-
-                                @Override
-                                public boolean onScale(
-                                        ScaleGestureDetector detector) {
-
-                                    escala *=
-                                            detector.getScaleFactor();
-
-
-                                    /*
-                                     * Límites
-                                     */
-                                    escala =
-                                            Math.max(
-                                                    1.0f,
-                                                    Math.min(
-                                                            escala,
-                                                            4.0f
-                                                    )
-                                            );
-
-
-                                    aplicarTransformacion();
-
-                                    return true;
-                                }
-                            }
-                    );
-        }
-
-
-        /**
-         * Aplica zoom + desplazamiento.
-         */
-        private void aplicarTransformacion() {
-
-            setScaleX(
-                    escala
-            );
-
-            setScaleY(
-                    escala
-            );
-
-            setTranslationX(
-                    desplazamientoX
-            );
-
-            setTranslationY(
-                    desplazamientoY
-            );
-        }
-
-
-        @Override
-        public boolean onTouchEvent(
-                MotionEvent event) {
-
-            /*
-             * Procesar zoom.
-             */
-            detector.onTouchEvent(
-                    event
-            );
-
-
-            switch (event.getActionMasked()) {
-
-                case MotionEvent.ACTION_DOWN:
-
-                    ultimaX =
-                            event.getX();
-
-                    ultimaY =
-                            event.getY();
-
-                    moviendo = true;
-
-
-                    /*
-                     * Pedimos al ScrollView que
-                     * no intercepte el gesto.
-                     */
-                    getParent()
-                            .requestDisallowInterceptTouchEvent(
-                                    true
-                            );
-
-                    return true;
-
-
-                case MotionEvent.ACTION_MOVE:
-
-                    /*
-                     * Solo arrastrar cuando
-                     * estamos ampliados.
-                     */
-                    if (escala > 1.0f
-                            && event.getPointerCount() == 1) {
-
-                        float nuevaX =
-                                event.getX();
-
-                        float nuevaY =
-                                event.getY();
-
-
-                        float diferenciaX =
-                                nuevaX - ultimaX;
-
-                        float diferenciaY =
-                                nuevaY - ultimaY;
-
-
-                        desplazamientoX +=
-                                diferenciaX;
-
-                        desplazamientoY +=
-                                diferenciaY;
-
-
-                        /*
-                         * Limitar el desplazamiento
-                         * para evitar perder la página.
-                         */
-                        float limiteX =
-                                getWidth()
-                                        * (escala - 1)
-                                        / 2f;
-
-                        float limiteY =
-                                getHeight()
-                                        * (escala - 1)
-                                        / 2f;
-
-
-                        if (limiteX < 0) {
-                            limiteX = 0;
+                            setScaleX(1.0f);
+                            setScaleY(1.0f);
+                            setTranslationX(0f);
+                            setTranslationY(0f);
                         }
 
-                        if (limiteY < 0) {
-                            limiteY = 0;
-                        }
+                        return true;
+                    }
+                }
+        );
+    }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
 
-                        desplazamientoX =
-                                Math.max(
-                                        -limiteX,
-                                        Math.min(
-                                                desplazamientoX,
-                                                limiteX
-                                        )
-                                );
+        // Procesar primero los gestos de ampliación con dos dedos.
+        detector.onTouchEvent(event);
 
+        ViewParent padre = getParent();
 
-                        desplazamientoY =
-                                Math.max(
-                                        -limiteY,
-                                        Math.min(
-                                                desplazamientoY,
-                                                limiteY
-                                        )
-                                );
+        switch (event.getActionMasked()) {
 
+            case MotionEvent.ACTION_DOWN:
 
-                        ultimaX =
-                                nuevaX;
+                ultimaX = event.getX();
+                ultimaY = event.getY();
 
-                        ultimaY =
-                                nuevaY;
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(escala > 1.0f);
+                }
 
+                return true;
 
-                        aplicarTransformacion();
+            case MotionEvent.ACTION_POINTER_DOWN:
+
+                // Permitir el gesto de zoom con dos dedos.
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(true);
+                }
+
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+
+                if (escala > 1.0f
+                        && !detector.isInProgress()
+                        && event.getPointerCount() == 1) {
+
+                    float diferenciaX = event.getX() - ultimaX;
+                    float diferenciaY = event.getY() - ultimaY;
+
+                    desplazamientoX += diferenciaX;
+                    desplazamientoY += diferenciaY;
+
+                    setTranslationX(desplazamientoX);
+                    setTranslationY(desplazamientoY);
+
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(true);
                     }
 
+                } else if (escala <= 1.0f) {
 
-                    return true;
-
-
-                case MotionEvent.ACTION_POINTER_DOWN:
-
-                    /*
-                     * Segundo dedo:
-                     * activar zoom.
-                     */
-                    getParent()
-                            .requestDisallowInterceptTouchEvent(
-                                    true
-                            );
-
-                    return true;
-
-
-                case MotionEvent.ACTION_POINTER_UP:
-
-                    return true;
-
-
-                case MotionEvent.ACTION_UP:
-
-                case MotionEvent.ACTION_CANCEL:
-
-                    moviendo = false;
-
-
-                    getParent()
-                            .requestDisallowInterceptTouchEvent(
-                                    false
-                            );
-
-
-                    /*
-                     * Si volvemos a 1x,
-                     * regresar al centro.
-                     */
-                    if (escala <= 1.0f) {
-
-                        escala = 1.0f;
-
-                        desplazamientoX = 0;
-
-                        desplazamientoY = 0;
-
-                        aplicarTransformacion();
+                    // Sin zoom, el ScrollView puede desplazarse verticalmente.
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(false);
                     }
+                }
 
+                ultimaX = event.getX();
+                ultimaY = event.getY();
 
-                    return true;
-            }
+                return true;
 
+            case MotionEvent.ACTION_POINTER_UP:
 
-            return true;
+                ultimaX = event.getX(0);
+                ultimaY = event.getY(0);
+
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(escala > 1.0f);
+                }
+
+                return true;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(false);
+                }
+
+                performClick();
+                return true;
+
+            default:
+                return true;
         }
     }
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        return true;
+    }
+}
 
 
     /**
