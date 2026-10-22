@@ -673,7 +673,50 @@ function guardarCancion(){
   abrir("canciones");
 }
 function eliminarCancionActual(){if(indiceActual<0)return;if(!confirm("¿Eliminar esta canción?"))return;const id=canciones[indiceActual].id;setlist=setlist.filter(x=>x!==id);canciones.splice(indiceActual,1);guardarDatos();indiceActual=-1;abrir("canciones")}
-function mostrarCanciones(){const q=(document.getElementById("buscarCancion").value||"").toLowerCase(),l=document.getElementById("listaCanciones");l.innerHTML="";const r=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q));if(!r.length){l.innerHTML='<div class="card">🎵 No hay canciones.</div>';return}r.forEach(({c,i})=>{l.innerHTML+=`<div class="card"><h3>🎵 ${esc(c.titulo)}</h3><div>${c.autor?`👤 ${esc(c.autor)}<br>`:""}Tonalidad: <b>${esc(c.tonalidad||"C")}</b> ${c.bpm?`<span class="badge">${c.bpm} BPM</span>`:""}</div><div class="row"><button class="fit" onclick="editarCancion(${i})">✏ Editar</button><button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button><button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button></div></div>`})}
+
+function mostrarCanciones() {
+  const q = (
+    document.getElementById("buscarCancion").value || ""
+  ).toLowerCase();
+
+  const l = document.getElementById("listaCanciones");
+  l.innerHTML = "";
+
+  const r = canciones
+    .map((c, i) => ({ c, i }))
+    .filter(x =>
+      (x.c.titulo || "").toLowerCase().includes(q)
+    )
+    .sort((a, b) =>
+      (a.c.titulo || "").localeCompare(
+        b.c.titulo || "",
+        "es",
+        { sensitivity: "base" }
+      )
+    );
+
+  if (!r.length) {
+    l.innerHTML = '<div class="card">🎵 No hay canciones.</div>';
+    return;
+  }
+
+  r.forEach(({ c, i }) => {
+    l.innerHTML += `
+      <div class="card">
+        <h3>🎵 ${esc(c.titulo)}</h3>
+        <div>
+          ${c.autor ? `👤 ${esc(c.autor)}<br>` : ""}
+          Tonalidad: <b>${esc(c.tonalidad || "C")}</b>
+          ${c.bpm ? `<span class="badge">${c.bpm} BPM</span>` : ""}
+        </div>
+        <div class="row">
+          <button class="fit" onclick="editarCancion(${i})">✏ Editar</button>
+          <button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button>
+          <button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button>
+        </div>
+      </div>`;
+  });
+}
 
 function agregarCancionSetlist(i){
   if(!canciones[i]) return;
@@ -755,7 +798,45 @@ function quitarSet(i){setlist.splice(i,1);guardarDatos();mostrarSetlist()}
 function limpiarSetlist(){if(confirm("¿Vaciar el setlist?")){setlist=[];guardarDatos();mostrarSetlist()}}
 function formatTime(s){s=Math.round(Number(s)||0);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
 
-function mostrarLetras(){const q=(document.getElementById("buscarLetra").value||"").toLowerCase(),l=document.getElementById("listaLetras");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach((c,i)=>{const ix=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📝 ${esc(c.titulo)}</h3><p class="small">${c.letra?"Letra guardada":"Sin letra todavía"}</p><button onclick="editarLetra(${ix})">📝 Abrir letra</button><button class="green" onclick="abrirModoEnVivo(${ix},'letra')">▶ Leer en vivo</button></div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📝 No hay canciones.</div>'}
+
+function mostrarLetras() {
+  const q = (
+    document.getElementById("buscarLetra").value || ""
+  ).toLowerCase();
+
+  const l = document.getElementById("listaLetras");
+  l.innerHTML = "";
+
+  const r = canciones
+    .map((c, i) => ({ c, i }))
+    .filter(x =>
+      (x.c.titulo || "").toLowerCase().includes(q)
+    )
+    .sort((a, b) =>
+      (a.c.titulo || "").localeCompare(
+        b.c.titulo || "",
+        "es",
+        { sensitivity: "base" }
+      )
+    );
+
+  r.forEach(({ c, i }) => {
+    l.innerHTML += `
+      <div class="card">
+        <h3>📝 ${esc(c.titulo)}</h3>
+        <p class="small">
+          ${c.letra ? "Letra guardada" : "Sin letra todavía"}
+        </p>
+        <button onclick="editarLetra(${i})">📝 Abrir letra</button>
+        <button class="green" onclick="abrirModoEnVivo(${i},'letra')">▶ Leer en vivo</button>
+      </div>`;
+  });
+
+  if (!l.innerHTML) {
+    l.innerHTML = '<div class="card">📝 No hay canciones.</div>';
+  }
+}
+
 function editarLetra(i){
   indiceActual=i;
 
@@ -786,7 +867,54 @@ function guardarLetra(){
 
   abrir("letras");
 }
-function mostrarCharts(){const q=(document.getElementById("buscarChart").value||"").toLowerCase(),l=document.getElementById("listaCharts");l.innerHTML="";canciones.filter(c=>(c.titulo||"").toLowerCase().includes(q)).forEach(c=>{const i=canciones.indexOf(c);l.innerHTML+=`<div class="card"><h3>📄 ${esc(c.titulo)}</h3><p class="small">${c.chart?"📄 "+esc(c.chartNombre||"Chart PDF"):"Sin chart todavía"}</p>${c.chart?`<button onclick="abrirPDF(${i})">👁 Abrir</button><button onclick="subirPDF(${i})">🔄 Cambiar</button><button class="red" onclick="eliminarPDF(${i})">🗑 Eliminar</button>`:`<button onclick="subirPDF(${i})">📎 Subir PDF</button>`}</div>`});if(!l.innerHTML)l.innerHTML='<div class="card">📄 No hay canciones.</div>'}
+
+function mostrarCharts() {
+  const q = (
+    document.getElementById("buscarChart").value || ""
+  ).toLowerCase();
+
+  const l = document.getElementById("listaCharts");
+  l.innerHTML = "";
+
+  const r = canciones
+    .map((c, i) => ({ c, i }))
+    .filter(x =>
+      (x.c.titulo || "").toLowerCase().includes(q)
+    )
+    .sort((a, b) =>
+      (a.c.titulo || "").localeCompare(
+        b.c.titulo || "",
+        "es",
+        { sensitivity: "base" }
+      )
+    );
+
+  r.forEach(({ c, i }) => {
+    l.innerHTML += `
+      <div class="card">
+        <h3>📄 ${esc(c.titulo)}</h3>
+        <p class="small">
+          ${c.chart ? "📄 " + esc(c.chartNombre || "Chart PDF") : "Sin chart todavía"}
+        </p>
+        ${
+          c.chart
+            ? `
+              <button onclick="abrirPDF(${i})">👁 Abrir</button>
+              <button onclick="subirPDF(${i})">🔄 Cambiar</button>
+              <button class="red" onclick="eliminarPDF(${i})">🗑 Eliminar</button>
+            `
+            : `
+              <button onclick="subirPDF(${i})">📎 Subir PDF</button>
+            `
+        }
+      </div>`;
+  });
+
+  if (!l.innerHTML) {
+    l.innerHTML = '<div class="card">📄 No hay canciones.</div>';
+  }
+}
+
 function subirPDF(i){const input=document.createElement("input");input.type="file";input.accept="application/pdf,.pdf";input.onchange=()=>{const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{canciones[i].chart=rd.result;canciones[i].chartNombre=f.name;guardarDatos();toast("✓ PDF guardado");mostrarCharts()};rd.readAsDataURL(f)};input.click()}
 function abrirPDF(i){
   if(!canciones[i]?.chart){
