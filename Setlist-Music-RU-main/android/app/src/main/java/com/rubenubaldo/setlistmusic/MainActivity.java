@@ -1,6 +1,7 @@
 package com.rubenubaldo.setlistmusic;
 
 import android.view.ViewParent;
+import android.view.ViewConfiguration;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,7 +12,6 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Base64;
 import android.view.Gravity;
-import android.view.GestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
@@ -306,7 +306,11 @@ scroll.addView(contenido);
 private class ZoomImageView extends ImageView {
 
         private final ScaleGestureDetector detector;
-        private final GestureDetector gestoDobleToque;
+        private long ultimoToqueArriba = 0L;
+        private float ultimoToqueX = 0f;
+        private float ultimoToqueY = 0f;
+        private final int ventanaDobleToque;
+        private final float distanciaDobleToque;
 
         public ZoomImageView(android.content.Context context) {
             super(context);
@@ -314,11 +318,13 @@ private class ZoomImageView extends ImageView {
             setAdjustViewBounds(true);
             setScaleType(ImageView.ScaleType.FIT_CENTER);
             setClickable(true);
-
-            // Escalar desde la esquina superior izquierda para que
-            // el espacio añadido debajo coincida con el tamaño ampliado.
+            setFocusable(true);
             setPivotX(0f);
             setPivotY(0f);
+
+            ViewConfiguration configuracion = ViewConfiguration.get(context);
+            ventanaDobleToque = ViewConfiguration.getDoubleTapTimeout();
+            distanciaDobleToque = configuracion.getScaledDoubleTapSlop();
 
             detector = new ScaleGestureDetector(
                     context,
@@ -332,48 +338,72 @@ private class ZoomImageView extends ImageView {
                         }
                     }
             );
+        }
 
-            gestoDobleToque = new GestureDetector(
-                    context,
-                    new GestureDetector.SimpleOnGestureListener() {
-                        @Override
-                        public boolean onDown(MotionEvent event) {
-                            return true;
-                        }
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            detector.onTouchEvent(event);
 
-                        @Override
-                        public boolean onDoubleTap(MotionEvent event) {
+            ViewParent padre = getParent();
+            if (padre != null) {
+                // El ScrollView puede desplazarse si no estamos pellizcando.
+                padre.requestDisallowInterceptTouchEvent(detector.isInProgress());
+            }
+
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    // No reiniciar el tiempo aquí: se compara al soltar cada toque.
+                    return true;
+
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    ultimoToqueArriba = 0L;
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(true);
+                    }
+                    return true;
+
+                case MotionEvent.ACTION_UP:
+                    if (!detector.isInProgress()) {
+                        long ahora = event.getEventTime();
+                        float x = event.getX();
+                        float y = event.getY();
+                        long intervalo = ahora - ultimoToqueArriba;
+                        float dx = x - ultimoToqueX;
+                        float dy = y - ultimoToqueY;
+                        float distancia = (float) Math.sqrt(dx * dx + dy * dy);
+
+                        if (ultimoToqueArriba > 0L
+                                && intervalo > 0L
+                                && intervalo <= ventanaDobleToque
+                                && distancia <= distanciaDobleToque) {
                             if (escalaPDF > 1.0f) {
                                 aplicarZoomGlobal(1.0f);
                             } else {
                                 aplicarZoomGlobal(2.0f);
                             }
-                            return true;
+                            ultimoToqueArriba = 0L;
+                        } else {
+                            ultimoToqueArriba = ahora;
+                            ultimoToqueX = x;
+                            ultimoToqueY = y;
                         }
                     }
-            );
-        }
+                    performClick();
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(false);
+                    }
+                    return true;
 
-        @Override
-        public boolean onTouchEvent(MotionEvent event) {
-            gestoDobleToque.onTouchEvent(event);
-            detector.onTouchEvent(event);
+                case MotionEvent.ACTION_CANCEL:
+                    ultimoToqueArriba = 0L;
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(false);
+                    }
+                    return true;
 
-            ViewParent padre = getParent();
-            if (padre != null) {
-                // El ScrollView conserva el desplazamiento vertical.
-                // Solo bloqueamos su interceptación durante el pellizco.
-                padre.requestDisallowInterceptTouchEvent(
-                        detector.isInProgress()
-                );
+                default:
+                    return true;
             }
-
-            if (event.getActionMasked() == MotionEvent.ACTION_UP
-                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                performClick();
-            }
-
-            return true;
         }
 
         @Override
