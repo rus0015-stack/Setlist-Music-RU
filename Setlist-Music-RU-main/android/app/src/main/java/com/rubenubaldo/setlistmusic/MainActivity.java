@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Base64;
 import android.view.Gravity;
+import android.view.GestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -39,6 +41,8 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private View pdfViewer;
+    private final ArrayList<ZoomImageView> paginasPDF = new ArrayList<>();
+    private float escalaPDF = 1.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +151,9 @@ public class MainActivity extends Activity {
      */
     private void mostrarPDF(File archivo) {
 
+        paginasPDF.clear();
+        escalaPDF = 1.0f;
+
         try {
 
             ParcelFileDescriptor descriptor =
@@ -192,7 +199,8 @@ public class MainActivity extends Activity {
                 page.close();
 
                 ZoomImageView imagen = new ZoomImageView(this);
-imagen.setImageBitmap(bitmap);
+                paginasPDF.add(imagen);
+                imagen.setImageBitmap(bitmap);
 imagen.setScaleType(ImageView.ScaleType.FIT_CENTER);
 imagen.setAdjustViewBounds(true);
 imagen.setPadding(0, 0, 0, 0);
@@ -297,63 +305,108 @@ scroll.addView(contenido);
     }
 private class ZoomImageView extends ImageView {
 
-    private float escala = 1.0f;
-    private ScaleGestureDetector detector;
+        private final ScaleGestureDetector detector;
+        private final GestureDetector gestoDobleToque;
 
-    public ZoomImageView(android.content.Context context) {
-        super(context);
+        public ZoomImageView(android.content.Context context) {
+            super(context);
 
-        setAdjustViewBounds(true);
-        setScaleType(ImageView.ScaleType.FIT_CENTER);
+            setAdjustViewBounds(true);
+            setScaleType(ImageView.ScaleType.FIT_CENTER);
+            setClickable(true);
 
-        detector = new ScaleGestureDetector(
-                context,
-                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            // Escalar desde la esquina superior izquierda para que
+            // el espacio añadido debajo coincida con el tamaño ampliado.
+            setPivotX(0f);
+            setPivotY(0f);
 
-                    @Override
-                    public boolean onScale(ScaleGestureDetector detector) {
-
-                        escala *= detector.getScaleFactor();
-
-                        escala = Math.max(
-                                1.0f,
-                                Math.min(escala, 4.0f)
-                        );
-
-                        setScaleX(escala);
-                        setScaleY(escala);
-
-                        return true;
+            detector = new ScaleGestureDetector(
+                    context,
+                    new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                        @Override
+                        public boolean onScale(ScaleGestureDetector detectorEscala) {
+                            aplicarZoomGlobal(
+                                    escalaPDF * detectorEscala.getScaleFactor()
+                            );
+                            return true;
+                        }
                     }
+            );
+
+            gestoDobleToque = new GestureDetector(
+                    context,
+                    new GestureDetector.SimpleOnGestureListener() {
+                        @Override
+                        public boolean onDown(MotionEvent event) {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onDoubleTap(MotionEvent event) {
+                            if (escalaPDF > 1.0f) {
+                                aplicarZoomGlobal(1.0f);
+                            } else {
+                                aplicarZoomGlobal(2.0f);
+                            }
+                            return true;
+                        }
+                    }
+            );
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            gestoDobleToque.onTouchEvent(event);
+            detector.onTouchEvent(event);
+
+            ViewParent padre = getParent();
+            if (padre != null) {
+                // El ScrollView conserva el desplazamiento vertical.
+                // Solo bloqueamos su interceptación durante el pellizco.
+                padre.requestDisallowInterceptTouchEvent(
+                        detector.isInProgress()
+                );
+            }
+
+            if (event.getActionMasked() == MotionEvent.ACTION_UP
+                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                performClick();
+            }
+
+            return true;
+        }
+
+        @Override
+        public boolean performClick() {
+            super.performClick();
+            return true;
+        }
+    }
+
+    /**
+     * Aplica el mismo zoom a todas las páginas del PDF.
+     */
+    private void aplicarZoomGlobal(float nuevaEscala) {
+        escalaPDF = Math.max(1.0f, Math.min(nuevaEscala, 4.0f));
+
+        for (ZoomImageView pagina : paginasPDF) {
+            pagina.setScaleX(escalaPDF);
+            pagina.setScaleY(escalaPDF);
+
+            ViewGroup.LayoutParams parametros = pagina.getLayoutParams();
+            if (parametros instanceof LinearLayout.LayoutParams) {
+                LinearLayout.LayoutParams lp =
+                        (LinearLayout.LayoutParams) parametros;
+
+                int altoBase = pagina.getHeight();
+                if (altoBase > 0) {
+                    lp.bottomMargin = (int) (altoBase * (escalaPDF - 1.0f));
+                    pagina.setLayoutParams(lp);
                 }
-        );
-    }
-
-    
-
-@Override
-public boolean onTouchEvent(MotionEvent event) {
-    detector.onTouchEvent(event);
-
-    // Sin zoom, el ScrollView puede desplazar las páginas.
-    if (escala <= 1.0f && !detector.isInProgress()) {
-        ViewParent padre = getParent();
-        if (padre != null) {
-            padre.requestDisallowInterceptTouchEvent(false);
-        }
-    } else {
-        // Con zoom, conserva los gestos para ampliar la imagen.
-        ViewParent padre = getParent();
-        if (padre != null) {
-            padre.requestDisallowInterceptTouchEvent(true);
+            }
         }
     }
 
-    return true;
-}
-
-
-}
     private void cerrarPDFAndroid() {
 
         if (pdfViewer != null) {
