@@ -320,11 +320,21 @@ private class ZoomImageView extends ImageView {
         );
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        detector.onTouchEvent(event);
+    
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    detector.onTouchEvent(event);
+
+    // Si hay zoom, la imagen controla el gesto.
+    if (escala > 1.0f || detector.isInProgress()) {
         return true;
     }
+
+    // Sin zoom, permite que el ScrollView
+    // reciba el gesto para recorrer las páginas.
+    return false;
+}
+
 }
     private void cerrarPDFAndroid() {
 
