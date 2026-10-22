@@ -1,7 +1,7 @@
 package com.rubenubaldo.setlistmusic;
 
 import android.view.ViewParent;
-import android.view.ViewConfiguration;
+import android.view.GestureDetector;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -305,12 +305,8 @@ scroll.addView(contenido);
     }
 private class ZoomImageView extends ImageView {
 
-        private final ScaleGestureDetector detector;
-        private long ultimoToqueArriba = 0L;
-        private float ultimoToqueX = 0f;
-        private float ultimoToqueY = 0f;
-        private final int ventanaDobleToque;
-        private final float distanciaDobleToque;
+        private final ScaleGestureDetector detectorEscala;
+        private final GestureDetector detectorGestos;
 
         public ZoomImageView(android.content.Context context) {
             super(context);
@@ -322,18 +318,35 @@ private class ZoomImageView extends ImageView {
             setPivotX(0f);
             setPivotY(0f);
 
-            ViewConfiguration configuracion = ViewConfiguration.get(context);
-            ventanaDobleToque = ViewConfiguration.getDoubleTapTimeout();
-            distanciaDobleToque = configuracion.getScaledDoubleTapSlop();
-
-            detector = new ScaleGestureDetector(
+            detectorEscala = new ScaleGestureDetector(
                     context,
                     new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                         @Override
-                        public boolean onScale(ScaleGestureDetector detectorEscala) {
+                        public boolean onScale(ScaleGestureDetector detector) {
                             aplicarZoomGlobal(
-                                    escalaPDF * detectorEscala.getScaleFactor()
+                                    escalaPDF * detector.getScaleFactor()
                             );
+                            return true;
+                        }
+                    }
+            );
+
+            detectorGestos = new GestureDetector(
+                    context,
+                    new GestureDetector.SimpleOnGestureListener() {
+                        @Override
+                        public boolean onDown(MotionEvent event) {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onDoubleTap(MotionEvent event) {
+                            // Un doble toque amplía todo el PDF; otro lo restablece.
+                            if (escalaPDF > 1.0f) {
+                                aplicarZoomGlobal(1.0f);
+                            } else {
+                                aplicarZoomGlobal(2.0f);
+                            }
                             return true;
                         }
                     }
@@ -342,68 +355,26 @@ private class ZoomImageView extends ImageView {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            detector.onTouchEvent(event);
+            detectorGestos.onTouchEvent(event);
+            detectorEscala.onTouchEvent(event);
 
             ViewParent padre = getParent();
             if (padre != null) {
-                // El ScrollView puede desplazarse si no estamos pellizcando.
-                padre.requestDisallowInterceptTouchEvent(detector.isInProgress());
+                // Solo bloquear el desplazamiento de páginas durante el pellizco.
+                padre.requestDisallowInterceptTouchEvent(
+                        detectorEscala.isInProgress()
+                );
             }
 
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    // No reiniciar el tiempo aquí: se compara al soltar cada toque.
-                    return true;
-
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    ultimoToqueArriba = 0L;
-                    if (padre != null) {
-                        padre.requestDisallowInterceptTouchEvent(true);
-                    }
-                    return true;
-
-                case MotionEvent.ACTION_UP:
-                    if (!detector.isInProgress()) {
-                        long ahora = event.getEventTime();
-                        float x = event.getX();
-                        float y = event.getY();
-                        long intervalo = ahora - ultimoToqueArriba;
-                        float dx = x - ultimoToqueX;
-                        float dy = y - ultimoToqueY;
-                        float distancia = (float) Math.sqrt(dx * dx + dy * dy);
-
-                        if (ultimoToqueArriba > 0L
-                                && intervalo > 0L
-                                && intervalo <= ventanaDobleToque
-                                && distancia <= distanciaDobleToque) {
-                            if (escalaPDF > 1.0f) {
-                                aplicarZoomGlobal(1.0f);
-                            } else {
-                                aplicarZoomGlobal(2.0f);
-                            }
-                            ultimoToqueArriba = 0L;
-                        } else {
-                            ultimoToqueArriba = ahora;
-                            ultimoToqueX = x;
-                            ultimoToqueY = y;
-                        }
-                    }
-                    performClick();
-                    if (padre != null) {
-                        padre.requestDisallowInterceptTouchEvent(false);
-                    }
-                    return true;
-
-                case MotionEvent.ACTION_CANCEL:
-                    ultimoToqueArriba = 0L;
-                    if (padre != null) {
-                        padre.requestDisallowInterceptTouchEvent(false);
-                    }
-                    return true;
-
-                default:
-                    return true;
+            if (event.getActionMasked() == MotionEvent.ACTION_UP
+                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(false);
+                }
+                performClick();
             }
+
+            return true;
         }
 
         @Override
@@ -420,6 +391,8 @@ private class ZoomImageView extends ImageView {
         escalaPDF = Math.max(1.0f, Math.min(nuevaEscala, 4.0f));
 
         for (ZoomImageView pagina : paginasPDF) {
+            pagina.setPivotX(0f);
+            pagina.setPivotY(0f);
             pagina.setScaleX(escalaPDF);
             pagina.setScaleY(escalaPDF);
 
@@ -428,9 +401,11 @@ private class ZoomImageView extends ImageView {
                 LinearLayout.LayoutParams lp =
                         (LinearLayout.LayoutParams) parametros;
 
+                // Compensar la altura visual ampliada para que las páginas
+                // siguientes mantengan su posición dentro del ScrollView.
                 int altoBase = pagina.getHeight();
                 if (altoBase > 0) {
-                    lp.bottomMargin = (int) (altoBase * (escalaPDF - 1.0f));
+                    lp.bottomMargin = Math.round(altoBase * (escalaPDF - 1.0f));
                     pagina.setLayoutParams(lp);
                 }
             }
