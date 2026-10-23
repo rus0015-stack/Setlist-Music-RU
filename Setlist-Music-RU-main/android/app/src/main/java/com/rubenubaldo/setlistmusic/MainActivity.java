@@ -1,21 +1,25 @@
 package com.rubenubaldo.setlistmusic;
 
+import android.content.Context;
 import android.view.ViewParent;
-import android.view.GestureDetector;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -30,8 +34,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
@@ -41,8 +45,6 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private View pdfViewer;
-    private final ArrayList<ZoomImageView> paginasPDF = new ArrayList<>();
-    private float escalaPDF = 1.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +66,13 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient());
 
-        webView.addJavascriptInterface(new PDFInterface(), "AndroidPDF");
+        webView.addJavascriptInterface(
+                new PDFInterface(),
+                "AndroidPDF"
+        );
 
         webView.setWebChromeClient(new WebChromeClient() {
+
             @Override
             public boolean onShowFileChooser(
                     WebView webView,
@@ -80,8 +86,12 @@ public class MainActivity extends Activity {
                 MainActivity.this.filePathCallback = filePathCallback;
 
                 try {
+
                     Intent intent = fileChooserParams.createIntent();
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                    intent.addCategory(
+                            Intent.CATEGORY_OPENABLE
+                    );
 
                     startActivityForResult(
                             intent,
@@ -89,7 +99,9 @@ public class MainActivity extends Activity {
                     );
 
                 } catch (Exception e) {
+
                     MainActivity.this.filePathCallback = null;
+
                     return false;
                 }
 
@@ -97,49 +109,67 @@ public class MainActivity extends Activity {
             }
         });
 
-        webView.loadUrl("file:///android_asset/index.html");
+        webView.loadUrl(
+                "file:///android_asset/index.html"
+        );
     }
 
+
     /**
-     * Puente entre JavaScript y Android para visualizar PDFs
-     * directamente dentro de la aplicación.
+     * Puente entre JavaScript y Android.
+     *
+     * Permite:
+     * - Abrir PDFs.
+     * - Guardar copias JSON en Descargas.
      */
     public class PDFInterface {
 
         @JavascriptInterface
         public void abrirPDF(String base64) {
-
             runOnUiThread(() -> {
-
+                File archivo = null;
                 try {
-
                     String datos = base64;
-
+                    if (datos == null || datos.trim().isEmpty()) {
+                        Toast.makeText(MainActivity.this, "El PDF está vacío", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     if (datos.contains(",")) {
                         datos = datos.substring(datos.indexOf(",") + 1);
                     }
 
                     byte[] pdfBytes = Base64.decode(datos, Base64.DEFAULT);
+                    archivo = new File(getCacheDir(), "chart_setlist_music.pdf");
+                    try (FileOutputStream fos = new FileOutputStream(archivo)) {
+                        fos.write(pdfBytes);
+                        fos.flush();
+                    }
 
-                    File archivo = new File(
-                            getCacheDir(),
-                            "chart_setlist_music.pdf"
+                    Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                            MainActivity.this,
+                            getPackageName() + ".fileprovider",
+                            archivo
                     );
 
-                    FileOutputStream fos = new FileOutputStream(archivo);
-                    fos.write(pdfBytes);
-                    fos.close();
+                    Intent verPDF = new Intent(Intent.ACTION_VIEW);
+                    verPDF.setDataAndType(uri, "application/pdf");
+                    verPDF.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                    mostrarPDF(archivo);
+                    Intent selector = Intent.createChooser(verPDF, "Abrir PDF con");
+                    startActivity(selector);
 
+                } catch (android.content.ActivityNotFoundException e) {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "No hay un visor PDF instalado. Instala uno compatible e inténtalo de nuevo.",
+                            Toast.LENGTH_LONG
+                    ).show();
                 } catch (Exception e) {
-
                     Toast.makeText(
                             MainActivity.this,
                             "No se pudo abrir el PDF",
-                            Toast.LENGTH_SHORT
+                            Toast.LENGTH_LONG
                     ).show();
-
                     e.printStackTrace();
                 }
             });
@@ -147,12 +177,9 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Muestra el PDF dentro de la propia aplicación.
+     * Muestra el PDF dentro de la aplicación.
      */
     private void mostrarPDF(File archivo) {
-
-        paginasPDF.clear();
-        escalaPDF = 1.0f;
 
         try {
 
@@ -162,32 +189,72 @@ public class MainActivity extends Activity {
                             ParcelFileDescriptor.MODE_READ_ONLY
                     );
 
-            PdfRenderer renderer = new PdfRenderer(descriptor);
+            PdfRenderer renderer =
+                    new PdfRenderer(descriptor);
 
-            LinearLayout contenido = new LinearLayout(this);
-            contenido.setOrientation(LinearLayout.VERTICAL);
-            contenido.setBackgroundColor(Color.WHITE);
-            contenido.setPadding(0, 0, 0, 0);
 
-            for (int i = 0; i < renderer.getPageCount(); i++) {
+            /*
+             * CONTENEDOR PRINCIPAL DE LAS PÁGINAS
+             */
+            LinearLayout contenido =
+                    new LinearLayout(this);
 
-                PdfRenderer.Page page = renderer.openPage(i);
+            contenido.setOrientation(
+                    LinearLayout.VERTICAL
+            );
 
-                int ancho = page.getWidth();
-                int alto = page.getHeight();
+            contenido.setBackgroundColor(
+                    Color.WHITE
+            );
 
-                float escala = 2.0f;
+            contenido.setPadding(
+                    0,
+                    0,
+                    0,
+                    0
+            );
 
-                int nuevoAncho = (int) (ancho * escala);
-                int nuevoAlto = (int) (alto * escala);
 
-                Bitmap bitmap = Bitmap.createBitmap(
-                        nuevoAncho,
-                        nuevoAlto,
-                        Bitmap.Config.ARGB_8888
+            /*
+             * CREAR TODAS LAS PÁGINAS
+             */
+            for (int i = 0;
+                 i < renderer.getPageCount();
+                 i++) {
+
+                PdfRenderer.Page page =
+                        renderer.openPage(i);
+
+                int ancho =
+                        page.getWidth();
+
+                int alto =
+                        page.getHeight();
+
+
+                /*
+                 * Resolución inicial del PDF.
+                 */
+                float escalaInicial = 2.0f;
+
+                int nuevoAncho =
+                        (int) (ancho * escalaInicial);
+
+                int nuevoAlto =
+                        (int) (alto * escalaInicial);
+
+
+                Bitmap bitmap =
+                        Bitmap.createBitmap(
+                                nuevoAncho,
+                                nuevoAlto,
+                                Bitmap.Config.ARGB_8888
+                        );
+
+                bitmap.eraseColor(
+                        Color.WHITE
                 );
 
-                bitmap.eraseColor(Color.WHITE);
 
                 page.render(
                         bitmap,
@@ -198,19 +265,29 @@ public class MainActivity extends Activity {
 
                 page.close();
 
-                ZoomImageView imagen = new ZoomImageView(this);
-                paginasPDF.add(imagen);
-                imagen.setImageBitmap(bitmap);
-imagen.setScaleType(ImageView.ScaleType.FIT_CENTER);
-imagen.setAdjustViewBounds(true);
-imagen.setPadding(0, 0, 0, 0);
 
-imagen.setLayoutParams(
-    new LinearLayout.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT
-    )
-);
+                /*
+                 * VISOR DE LA PÁGINA
+                 */
+                ZoomImageView imagen =
+                        new ZoomImageView(this);
+
+                imagen.setImageBitmap(
+                        bitmap
+                );
+
+                imagen.setScaleType(
+                        ImageView.ScaleType.FIT_CENTER
+                );
+
+                imagen.setAdjustViewBounds(
+                        true
+                );
+
+                imagen.setBackgroundColor(
+                        Color.WHITE
+                );
+
 
                 LinearLayout.LayoutParams parametros =
                         new LinearLayout.LayoutParams(
@@ -220,45 +297,145 @@ imagen.setLayoutParams(
 
                 parametros.bottomMargin = 0;
 
-                contenido.addView(imagen, parametros);
+
+                contenido.addView(
+                        imagen,
+                        parametros
+                );
             }
+
 
             renderer.close();
             descriptor.close();
 
-            ScrollView scroll = new ScrollView(this);
-scroll.setBackgroundColor(Color.WHITE);
-scroll.setFillViewport(true);
-scroll.setPadding(0, 0, 0, 0);
-scroll.addView(contenido);
 
-            LinearLayout principal = new LinearLayout(this);
-            principal.setOrientation(LinearLayout.VERTICAL);
-            principal.setBackgroundColor(Color.rgb(30, 30, 30));
+            /*
+             * SCROLL VERTICAL
+             */
+            ScrollView scroll =
+                    new ScrollView(this);
 
-            TextView barra = new TextView(this);
+            scroll.setBackgroundColor(
+                    Color.WHITE
+            );
 
-            barra.setText("📄  CHART PDF");
-            barra.setTextColor(Color.WHITE);
-            barra.setTextSize(17);
-            barra.setGravity(Gravity.CENTER_VERTICAL);
-            barra.setPadding(20, 15, 20, 15);
-            barra.setBackgroundColor(Color.rgb(20, 23, 30));
+            scroll.setFillViewport(
+                    true
+            );
 
-            TextView cerrar = new TextView(this);
+            scroll.setPadding(
+                    0,
+                    0,
+                    0,
+                    0
+            );
 
-            cerrar.setText("✕  Cerrar");
-            cerrar.setTextColor(Color.WHITE);
-            cerrar.setTextSize(15);
-            cerrar.setGravity(Gravity.CENTER);
-            cerrar.setPadding(20, 15, 20, 15);
-            cerrar.setBackgroundColor(Color.rgb(65, 95, 220));
+            scroll.addView(
+                    contenido
+            );
 
-            cerrar.setOnClickListener(v -> cerrarPDFAndroid());
 
-            LinearLayout fila = new LinearLayout(this);
-            fila.setOrientation(LinearLayout.HORIZONTAL);
-            fila.setGravity(Gravity.CENTER_VERTICAL);
+            /*
+             * CONTENEDOR PRINCIPAL
+             */
+            LinearLayout principal =
+                    new LinearLayout(this);
+
+            principal.setOrientation(
+                    LinearLayout.VERTICAL
+            );
+
+            principal.setBackgroundColor(
+                    Color.rgb(30, 30, 30)
+            );
+
+
+            /*
+             * BARRA SUPERIOR
+             */
+            TextView barra =
+                    new TextView(this);
+
+            barra.setText(
+                    "📄  CHART PDF"
+            );
+
+            barra.setTextColor(
+                    Color.WHITE
+            );
+
+            barra.setTextSize(
+                    17
+            );
+
+            barra.setGravity(
+                    Gravity.CENTER_VERTICAL
+            );
+
+            barra.setPadding(
+                    20,
+                    15,
+                    20,
+                    15
+            );
+
+            barra.setBackgroundColor(
+                    Color.rgb(20, 23, 30)
+            );
+
+
+            /*
+             * BOTÓN CERRAR
+             */
+            TextView cerrar =
+                    new TextView(this);
+
+            cerrar.setText(
+                    "✕  Cerrar"
+            );
+
+            cerrar.setTextColor(
+                    Color.WHITE
+            );
+
+            cerrar.setTextSize(
+                    15
+            );
+
+            cerrar.setGravity(
+                    Gravity.CENTER
+            );
+
+            cerrar.setPadding(
+                    20,
+                    15,
+                    20,
+                    15
+            );
+
+            cerrar.setBackgroundColor(
+                    Color.rgb(65, 95, 220)
+            );
+
+            cerrar.setOnClickListener(
+                    v -> cerrarPDFAndroid()
+            );
+
+
+            /*
+             * FILA SUPERIOR
+             */
+            LinearLayout fila =
+                    new LinearLayout(this);
+
+            fila.setOrientation(
+                    LinearLayout.HORIZONTAL
+            );
+
+            fila.setGravity(
+                    Gravity.CENTER_VERTICAL
+            );
+
 
             fila.addView(
                     barra,
@@ -269,6 +446,7 @@ scroll.addView(contenido);
                     )
             );
 
+
             fila.addView(
                     cerrar,
                     new LinearLayout.LayoutParams(
@@ -277,7 +455,11 @@ scroll.addView(contenido);
                     )
             );
 
-            principal.addView(fila);
+
+            principal.addView(
+                    fila
+            );
+
 
             principal.addView(
                     scroll,
@@ -288,9 +470,13 @@ scroll.addView(contenido);
                     )
             );
 
+
             pdfViewer = principal;
 
-            setContentView(pdfViewer);
+            setContentView(
+                    pdfViewer
+            );
+
 
         } catch (Exception e) {
 
@@ -303,122 +489,179 @@ scroll.addView(contenido);
             e.printStackTrace();
         }
     }
+
+
+    /**
+     * ImageView especial para PDF.
+     *
+     * Permite:
+     *
+     * - Zoom con dos dedos.
+     * - Arrastre horizontal.
+     * - Arrastre vertical.
+     * - Zoom máximo 4x.
+     */
+    
 private class ZoomImageView extends ImageView {
 
-        private final ScaleGestureDetector detectorEscala;
-        private final GestureDetector detectorGestos;
+    private float escala = 1.0f;
+    private float ultimaX;
+    private float ultimaY;
+    private float desplazamientoX = 0f;
+    private float desplazamientoY = 0f;
 
-        public ZoomImageView(android.content.Context context) {
-            super(context);
+    private ScaleGestureDetector detector;
 
-            setAdjustViewBounds(true);
-            setScaleType(ImageView.ScaleType.FIT_CENTER);
-            setClickable(true);
-            setFocusable(true);
-            setPivotX(0f);
-            setPivotY(0f);
+    public ZoomImageView(Context context) {
+        super(context);
 
-            detectorEscala = new ScaleGestureDetector(
-                    context,
-                    new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                        @Override
-                        public boolean onScale(ScaleGestureDetector detector) {
-                            aplicarZoomGlobal(
-                                    escalaPDF * detector.getScaleFactor()
-                            );
-                            return true;
+        setScaleType(ImageView.ScaleType.FIT_CENTER);
+        setAdjustViewBounds(true);
+        setClickable(true);
+
+        detector = new ScaleGestureDetector(
+                context,
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detectorEscala) {
+
+                        escala *= detectorEscala.getScaleFactor();
+
+                        // Limitar el zoom para evitar ampliaciones excesivas.
+                        escala = Math.max(1.0f, Math.min(4.0f, escala));
+
+                        setScaleX(escala);
+                        setScaleY(escala);
+
+                        if (escala <= 1.0f) {
+                            escala = 1.0f;
+                            desplazamientoX = 0f;
+                            desplazamientoY = 0f;
+
+                            setScaleX(1.0f);
+                            setScaleY(1.0f);
+                            setTranslationX(0f);
+                            setTranslationY(0f);
                         }
+
+                        return true;
                     }
-            );
+                }
+        );
+    }
 
-            detectorGestos = new GestureDetector(
-                    context,
-                    new GestureDetector.SimpleOnGestureListener() {
-                        @Override
-                        public boolean onDown(MotionEvent event) {
-                            return true;
-                        }
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
 
-                        @Override
-                        public boolean onDoubleTap(MotionEvent event) {
-                            // Un doble toque amplía todo el PDF; otro lo restablece.
-                            if (escalaPDF > 1.0f) {
-                                aplicarZoomGlobal(1.0f);
-                            } else {
-                                aplicarZoomGlobal(2.0f);
-                            }
-                            return true;
-                        }
+        // Procesar primero los gestos de ampliación con dos dedos.
+        detector.onTouchEvent(event);
+
+        ViewParent padre = getParent();
+
+        switch (event.getActionMasked()) {
+
+            case MotionEvent.ACTION_DOWN:
+
+                ultimaX = event.getX();
+                ultimaY = event.getY();
+
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(escala > 1.0f);
+                }
+
+                return true;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+
+                // Permitir el gesto de zoom con dos dedos.
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(true);
+                }
+
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+
+                if (escala > 1.0f
+                        && !detector.isInProgress()
+                        && event.getPointerCount() == 1) {
+
+                    float diferenciaX = event.getX() - ultimaX;
+                    float diferenciaY = event.getY() - ultimaY;
+
+                    desplazamientoX += diferenciaX;
+                    desplazamientoY += diferenciaY;
+
+                    setTranslationX(desplazamientoX);
+                    setTranslationY(desplazamientoY);
+
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(true);
                     }
-            );
-        }
 
-        @Override
-        public boolean onTouchEvent(MotionEvent event) {
-            detectorGestos.onTouchEvent(event);
-            detectorEscala.onTouchEvent(event);
+                } else if (escala <= 1.0f) {
 
-            ViewParent padre = getParent();
-            if (padre != null) {
-                // Solo bloquear el desplazamiento de páginas durante el pellizco.
-                padre.requestDisallowInterceptTouchEvent(
-                        detectorEscala.isInProgress()
-                );
-            }
+                    // Sin zoom, el ScrollView puede desplazarse verticalmente.
+                    if (padre != null) {
+                        padre.requestDisallowInterceptTouchEvent(false);
+                    }
+                }
 
-            if (event.getActionMasked() == MotionEvent.ACTION_UP
-                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                ultimaX = event.getX();
+                ultimaY = event.getY();
+
+                return true;
+
+            case MotionEvent.ACTION_POINTER_UP:
+
+                ultimaX = event.getX(0);
+                ultimaY = event.getY(0);
+
+                if (padre != null) {
+                    padre.requestDisallowInterceptTouchEvent(escala > 1.0f);
+                }
+
+                return true;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+
                 if (padre != null) {
                     padre.requestDisallowInterceptTouchEvent(false);
                 }
+
                 performClick();
-            }
+                return true;
 
-            return true;
-        }
-
-        @Override
-        public boolean performClick() {
-            super.performClick();
-            return true;
+            default:
+                return true;
         }
     }
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        return true;
+    }
+}
+
 
     /**
-     * Aplica el mismo zoom a todas las páginas del PDF.
+     * Cierra el visor PDF.
      */
-    private void aplicarZoomGlobal(float nuevaEscala) {
-        escalaPDF = Math.max(1.0f, Math.min(nuevaEscala, 4.0f));
-
-        for (ZoomImageView pagina : paginasPDF) {
-            pagina.setPivotX(0f);
-            pagina.setPivotY(0f);
-            pagina.setScaleX(escalaPDF);
-            pagina.setScaleY(escalaPDF);
-
-            ViewGroup.LayoutParams parametros = pagina.getLayoutParams();
-            if (parametros instanceof LinearLayout.LayoutParams) {
-                LinearLayout.LayoutParams lp =
-                        (LinearLayout.LayoutParams) parametros;
-
-                // Compensar la altura visual ampliada para que las páginas
-                // siguientes mantengan su posición dentro del ScrollView.
-                int altoBase = pagina.getHeight();
-                if (altoBase > 0) {
-                    lp.bottomMargin = Math.round(altoBase * (escalaPDF - 1.0f));
-                    pagina.setLayoutParams(lp);
-                }
-            }
-        }
-    }
-
     private void cerrarPDFAndroid() {
 
         if (pdfViewer != null) {
+
             pdfViewer = null;
-            setContentView(webView);
+
+            setContentView(
+                    webView
+            );
         }
     }
+
 
     @Override
     protected void onActivityResult(
@@ -426,41 +669,66 @@ private class ZoomImageView extends ImageView {
             int resultCode,
             Intent data) {
 
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(
+                requestCode,
+                resultCode,
+                data
+        );
 
-        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+
+        if (requestCode ==
+                FILE_CHOOSER_REQUEST_CODE) {
 
             Uri[] results = null;
 
-            if (resultCode == RESULT_OK && data != null) {
+
+            if (resultCode == RESULT_OK
+                    && data != null) {
+
 
                 if (data.getClipData() != null) {
 
-                    int count = data.getClipData().getItemCount();
-                    results = new Uri[count];
+                    int count =
+                            data.getClipData()
+                                    .getItemCount();
 
-                    for (int i = 0; i < count; i++) {
+                    results =
+                            new Uri[count];
 
-                        results[i] = data.getClipData()
-                                .getItemAt(i)
-                                .getUri();
+
+                    for (int i = 0;
+                         i < count;
+                         i++) {
+
+                        results[i] =
+                                data.getClipData()
+                                        .getItemAt(i)
+                                        .getUri();
                     }
 
-                } else if (data.getData() != null) {
 
-                    results = new Uri[]{
-                            data.getData()
-                    };
+                } else if (
+                        data.getData() != null) {
+
+                    results =
+                            new Uri[]{
+                                    data.getData()
+                            };
                 }
             }
 
+
             if (filePathCallback != null) {
 
-                filePathCallback.onReceiveValue(results);
+                filePathCallback.onReceiveValue(
+                        results
+                );
+
                 filePathCallback = null;
             }
         }
     }
+
 
     @Override
     public void onBackPressed() {
