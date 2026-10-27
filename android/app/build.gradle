@@ -1,4 +1,7 @@
-plugins { id 'com.android.application' }
+
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace 'com.rubenubaldo.setlistmusic'
@@ -18,4 +21,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.15.0'
 }
