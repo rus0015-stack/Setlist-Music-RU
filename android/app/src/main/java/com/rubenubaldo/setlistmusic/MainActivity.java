@@ -155,13 +155,31 @@ public class MainActivity extends Activity {
                                     "chart_setlist_music.pdf"
                             );
 
-                    FileOutputStream fos =
-                            new FileOutputStream(archivo);
+                    
+FileOutputStream fos = new FileOutputStream(archivo);
 
-                    fos.write(pdfBytes);
-                    fos.close();
+fos.write(pdfBytes);
+fos.close();
 
-                    mostrarPDF(archivo);
+// Abrir el PDF con una aplicación externa.
+android.net.Uri uri =
+        androidx.core.content.FileProvider.getUriForFile(
+                MainActivity.this,
+                getPackageName() + ".fileprovider",
+                archivo
+        );
+
+Intent verPDF = new Intent(Intent.ACTION_VIEW);
+verPDF.setDataAndType(uri, "application/pdf");
+verPDF.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+Intent selector = Intent.createChooser(
+        verPDF,
+        "Abrir PDF con"
+);
+
+startActivity(selector);
+
 
                 } catch (Exception e) {
 
