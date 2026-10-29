@@ -169,7 +169,7 @@ public void abrirPDF(String base64) {
             android.net.Uri uri =
                     androidx.core.content.FileProvider.getUriForFile(
                             MainActivity.this,
-                            BuildConfig.APPLICATION_ID + ".fileprovider",
+                            getPackageName() + ".fileprovider",
                             archivo
                     );
 
