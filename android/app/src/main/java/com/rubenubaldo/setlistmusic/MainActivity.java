@@ -127,72 +127,78 @@ public class MainActivity extends Activity {
         /**
          * ABRIR PDF
          */
-        @JavascriptInterface
-        public void abrirPDF(String base64) {
 
-            runOnUiThread(() -> {
+@JavascriptInterface
+public void abrirPDF(String base64) {
+    runOnUiThread(() -> {
+        File archivo = null;
 
-                try {
+        try {
+            if (base64 == null || base64.trim().isEmpty()) {
+                throw new Exception("El contenido del PDF está vacío");
+            }
 
-                    String datos = base64;
+            String datos = base64.trim();
 
-                    if (datos.contains(",")) {
+            if (datos.contains(",")) {
+                datos = datos.substring(datos.indexOf(",") + 1);
+            }
 
-                        datos = datos.substring(
-                                datos.indexOf(",") + 1
-                        );
-                    }
+            byte[] pdfBytes = Base64.decode(datos, Base64.DEFAULT);
 
-                    byte[] pdfBytes =
-                            Base64.decode(
-                                    datos,
-                                    Base64.DEFAULT
-                            );
+            if (pdfBytes.length < 5
+                    || pdfBytes[0] != '%'
+                    || pdfBytes[1] != 'P'
+                    || pdfBytes[2] != 'D'
+                    || pdfBytes[3] != 'F'
+                    || pdfBytes[4] != '-') {
+                throw new Exception("El contenido recibido no es un PDF válido");
+            }
 
-                    File archivo =
-                            new File(
-                                    getCacheDir(),
-                                    "chart_setlist_music.pdf"
-                            );
+            archivo = new File(getCacheDir(), "chart_setlist_music.pdf");
 
-                    
-FileOutputStream fos = new FileOutputStream(archivo);
+            try (FileOutputStream fos = new FileOutputStream(archivo)) {
+                fos.write(pdfBytes);
+                fos.flush();
+            }
 
-fos.write(pdfBytes);
-fos.close();
+            if (!archivo.exists() || archivo.length() == 0) {
+                throw new Exception("El archivo PDF quedó vacío");
+            }
 
-// Abrir el PDF con una aplicación externa.
-android.net.Uri uri =
-        androidx.core.content.FileProvider.getUriForFile(
-                MainActivity.this,
-                getPackageName() + ".fileprovider",
-                archivo
-        );
-
-Intent verPDF = new Intent(Intent.ACTION_VIEW);
-verPDF.setDataAndType(uri, "application/pdf");
-verPDF.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-Intent selector = Intent.createChooser(
-        verPDF,
-        "Abrir PDF con"
-);
-
-startActivity(selector);
-
-
-                } catch (Exception e) {
-
-                    Toast.makeText(
+            android.net.Uri uri =
+                    androidx.core.content.FileProvider.getUriForFile(
                             MainActivity.this,
-                            "No se pudo abrir el PDF",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                            BuildConfig.APPLICATION_ID + ".fileprovider",
+                            archivo
+                    );
 
-                    e.printStackTrace();
-                }
-            });
+            Intent verPDF = new Intent(Intent.ACTION_VIEW);
+            verPDF.setDataAndType(uri, "application/pdf");
+            verPDF.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            Intent selector = Intent.createChooser(verPDF, "Abrir PDF con");
+            startActivity(selector);
+
+        } catch (android.content.ActivityNotFoundException e) {
+            Toast.makeText(
+                    MainActivity.this,
+                    "No hay una aplicación para abrir PDF instalada",
+                    Toast.LENGTH_LONG
+            ).show();
+
+        } catch (Exception e) {
+            Toast.makeText(
+                    MainActivity.this,
+                    "Error al abrir PDF: " + e.getMessage(),
+                    Toast.LENGTH_LONG
+            ).show();
+
+            e.printStackTrace();
         }
+    });
+}
+
 
 
         /**
