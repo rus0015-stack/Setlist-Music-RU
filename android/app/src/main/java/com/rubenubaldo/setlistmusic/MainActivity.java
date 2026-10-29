@@ -167,11 +167,11 @@ public void abrirPDF(String base64) {
             }
 
             android.net.Uri uri =
-                    androidx.core.content.FileProvider.getUriForFile(
-                            MainActivity.this,
-                            getPackageName() + ".fileprovider",
-                            archivo
-                    );
+        androidx.core.content.FileProvider.getUriForFile(
+                MainActivity.this,
+                MainActivity.this.getPackageName() + ".fileprovider",
+                archivo
+        );
 
             Intent verPDF = new Intent(Intent.ACTION_VIEW);
             verPDF.setDataAndType(uri, "application/pdf");
