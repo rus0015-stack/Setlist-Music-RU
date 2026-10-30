@@ -251,9 +251,17 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   <label>Título</label><input id="titulo" placeholder="Nombre de la canción">
   <label>Tonalidad original</label>
   <select id="tonalidad"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option><option>A#</option><option>B</option></select>
-  <label>Autor / cantante</label><input id="autor" placeholder="Ej.: Nombre del cantante">
-  <label>Tempo (BPM)</label><input id="bpm" type="number" min="1" max="300" placeholder="Ej.: 92">
-  <h3>🎼 Estructura</h3>
+  <label>Autor / cantante</label>
+<input id="autor" placeholder="Ej.: Nombre del cantante">
+
+<label>Tempo (BPM)</label>
+<input id="bpm" type="number" min="1" max="300" placeholder="Ej.: 92">
+
+<label>🔗 Enlace de audio original</label>
+<input id="audioUrl" type="url" placeholder="Pega aquí el enlace de YouTube, Spotify, etc.">
+<p class="small">Utiliza el enlace de la versión exacta que deseas transcribir.</p>
+
+<h3>🎼 Estructura</h3>
   <p class="small">Escribe acordes o notas. La app coloca automáticamente el nombre de cada sección.</p>
   <div id="estructuraCancion"></div>
   <label>Notas / observaciones</label><textarea id="notasCancion" placeholder="Capo, afinación, indicaciones para músicos, dinámica, etc."></textarea>
@@ -625,8 +633,32 @@ function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizar
 function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
 
-function nuevaCancion(){indiceActual=-1;["titulo","autor","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
-function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
+function nuevaCancion(){
+  indiceActual=-1;
+  ["titulo","autor","bpm","notasCancion","audioUrl"].forEach(id=>{
+    const campo=document.getElementById(id);
+    if(campo) campo.value="";
+  });
+  document.getElementById("tonalidad").value="C";
+  crearEditorEstructura({});
+  abrir("editor");
+}
+function editarCancion(i){
+  indiceActual=i;
+  const c=canciones[i];
+
+  document.getElementById("titulo").value=c.titulo||"";
+  document.getElementById("autor").value=c.autor||"";
+  document.getElementById("bpm").value=c.bpm||"";
+  document.getElementById("notasCancion").value=c.notas||"";
+  document.getElementById("tonalidad").value=c.tonalidad||"C";
+
+  const audio=document.getElementById("audioUrl");
+  if(audio) audio.value=c.audioUrl||"";
+
+  crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));
+  abrir("editor");
+}
 function guardarCancion(){
   const titulo=document.getElementById("titulo").value.trim();
 
@@ -648,6 +680,7 @@ function guardarCancion(){
     ...anterior,
     titulo,
     autor:document.getElementById("autor").value.trim(),
+    audioUrl:document.getElementById("audioUrl")?.value.trim()||"",
     tonalidad:document.getElementById("tonalidad").value,
     bpm:document.getElementById("bpm").value
       ?Number(document.getElementById("bpm").value)
