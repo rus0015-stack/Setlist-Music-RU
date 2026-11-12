@@ -88,7 +88,37 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .chart-section{font-size:11px;font-weight:900;letter-spacing:.5px;color:#3452a4;margin:12px 0 4px;text-transform:uppercase}
 .chart-empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 @media(max-width:650px){.chart-measures{grid-template-columns:repeat(2,minmax(115px,1fr));min-width:0}.chart-sheet{padding:12px}}
+/* MODO EN VIVO: máximo espacio para canción y letra */
+#tocar {
+  padding-bottom: 10px;
+}
 
+#tocar .tocar-contenido-card {
+  padding: 10px;
+  margin-top: 8px;
+}
+
+#tocar .tocar-pre {
+  width: 100%;
+  min-height: 65vh;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: clamp(18px, 3vw, 28px);
+  line-height: 1.65;
+}
+
+#tocar .tabs {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+#tocar .tabs button {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 5px;
+}
 </style>
 </head>
 <body>
@@ -212,23 +242,28 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   <button class="green" onclick="guardarReferencia()">💾 Guardar referencia</button>
 </section>
 
+
 <section id="tocar" class="hidden">
   <button class="secondary" onclick="cerrarTocar()">✕ Salir</button>
-  <h2 id="tocarTitulo"></h2><h3 id="tocarTonalidad"></h3>
-  <div class="tono"><button onclick="cambiarTonalidad(-1)">− ½</button><button id="botonTonalidad" class="center">Tonalidad: C</button><button onclick="cambiarTonalidad(1)">+ ½</button></div>
-  <div class="row" style="margin:8px 0">
-    <button class="secondary fit" onclick="cancionAnterior()">← Anterior</button>
-    <button class="secondary fit" onclick="cancionSiguiente()">Siguiente →</button>
+
+  <h2 id="tocarTitulo"></h2>
+  <h3 id="tocarTonalidad"></h3>
+
+  <div class="tono">
+    <button onclick="cambiarTonalidad(-1)">− ½</button>
+    <button id="botonTonalidad" class="center">Tonalidad: C</button>
+    <button onclick="cambiarTonalidad(1)">+ ½</button>
   </div>
+
   <div class="tabs">
     <button onclick="mostrarVistaTocar('cancion')">🎵 Canción</button>
     <button onclick="mostrarVistaTocar('letra')">📝 Letra</button>
     <button onclick="mostrarVistaTocar('chart')">📄 Chart</button>
-    <button onclick="mostrarVistaTocar('secuencia')">🎧 Sec.</button>
-    <button onclick="mostrarVistaTocar('referencia')">🔗 Ref.</button>
-    <button onclick="abrirEditorDesdeTocar()">✏ Editar</button>
   </div>
-  <div class="card"><pre id="tocarContenido" class="tocar-pre"></pre></div>
+
+  <div class="card tocar-contenido-card">
+    <pre id="tocarContenido" class="tocar-pre"></pre>
+  </div>
 </section>
 
 <section id="ajustes" class="hidden">
