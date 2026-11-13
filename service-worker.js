@@ -1,4 +1,4 @@
-const CACHE = 'setlist-music-v5-1';
+const CACHE = 'setlist-music-v5-2';
 
 const CORE = [
   './',
