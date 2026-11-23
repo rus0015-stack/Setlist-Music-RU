@@ -26,7 +26,18 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .section-label{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:8px;background:var(--card2);color:var(--txt)}
 .live-section{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);border-left:5px solid var(--blue)}
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
-.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{min-height:46px;height:46px;margin:0;padding:8px;font-size:16px}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{
+  width:100%;
+  min-height:100px;
+  height:auto;
+  margin:0;
+  padding:10px;
+  font-size:17px;
+  line-height:1.8;
+  white-space:pre-wrap;
+  resize:vertical;
+  overflow-y:hidden;
+}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
 #visorPDF{
   position:fixed;
   top:0;
@@ -323,8 +334,82 @@ function abrir(n){
   return true;
 }
 function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
-function normalizarAcordesTexto(texto){if(!texto)return "";let t=String(texto).replace(/\s*[-–—]\s*/g," | ");const patron=/(^|[\s|([\{,:;])([a-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?=$|[\s|)\]\},:;.])/g;return t.replace(patron,(m,a,n,al,q)=>a+n.toUpperCase()+(al||"")+(q||""))}
-function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card";d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="1" placeholder="Ej.: D | A | Bm | G">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value)});boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\\s)\\|\\s*$/.test(antes)||/^\\s*\\|(?:\\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
+function normalizarAcordesTexto(texto){
+  if(!texto) return "";
+
+  return String(texto).replace(
+    /(^|[\s|([\{,:;])([a-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?=$|[\s|)\]\},:;.])/g,
+    (m,a,n,al,q) => a+n.toUpperCase()+(al||"")+(q||"")
+  );
+}
+function crearEditorEstructura(datos={}){
+  const c=document.getElementById("estructuraCancion");
+  c.innerHTML="";
+
+  SECCIONES.forEach(([k,n])=>{
+    const d=document.createElement("div");
+    d.className="section-card";
+
+    d.innerHTML=`
+      <div class="section-head">
+        <label><b>🎵 ${n}</b></label>
+        <button type="button"
+          class="insert-separator"
+          title="Insertar | en la posición del cursor">|</button>
+      </div>
+
+      <textarea
+        id="sec_${k}"
+        class="campoSeccion"
+        rows="4"
+        placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>
+    `;
+
+    c.appendChild(d);
+
+    const textarea=d.querySelector("textarea");
+    const boton=d.querySelector(".insert-separator");
+
+    // Ajusta el alto para mostrar las líneas que el usuario escribe
+    function ajustarAltura(){
+      textarea.style.height="auto";
+      textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";
+    }
+
+    textarea.addEventListener("input",ajustarAltura);
+
+    textarea.addEventListener("blur",function(){
+      const posicion=this.selectionStart;
+      this.value=normalizarAcordesTexto(this.value);
+      ajustarAltura();
+    });
+
+    ajustarAltura();
+
+    boton.addEventListener("click",function(){
+      textarea.focus();
+
+      const inicio=textarea.selectionStart??textarea.value.length;
+      const fin=textarea.selectionEnd??inicio;
+
+      const antes=textarea.value.slice(0,inicio);
+      const despues=textarea.value.slice(fin);
+
+      let separador=" | ";
+
+      if(/(?:^|\\s)\\|\\s*$/.test(antes)||
+         /^\\s*\\|(?:\\s|$)/.test(despues)){
+        separador="|";
+      }
+
+      textarea.setRangeText(separador,inicio,fin,"end");
+
+      textarea.dispatchEvent(new Event("input",{bubbles:true}));
+      textarea.dispatchEvent(new Event("change",{bubbles:true}));
+      textarea.focus();
+    });
+  });
+}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
 function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
