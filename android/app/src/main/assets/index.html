@@ -635,7 +635,7 @@ function actualizarTonalidadUI(){const t=normalizarNota(tonalidadTemporal||"C");
 function cambiarTonalidad(p){if(indiceActual<0)return;const pos=obtenerPosicion(tonalidadTemporal||canciones[indiceActual].tonalidad||"C");tonalidadTemporal=NOTAS[(pos+p+12)%12];actualizarTonalidadUI();mostrarVistaTocar("cancion")}
 function transponerNota(n,s){const p=obtenerPosicion(n);return p<0?n:NOTAS[(p+s+120)%12]}
 function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-G](?:#|b)?))?$/);if(!m)return a;return transponerNota(m[1],s)+(m[2]||"")+(m[3]?"/"+transponerNota(m[3],s):"")}
-function transponerTexto(txt,destino){txt=String(txt||"").replace(/\s*[-–—]\s*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
+function transponerTexto(txt,destino){txt=String(txt||"").replace(/[ \t]*[-–—][ \t]*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
 function renderEstructuraEnVivo(c){
   const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
   const partes=SECCIONES.filter(([k])=>(estructura[k]||"").trim());
