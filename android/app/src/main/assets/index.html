@@ -390,68 +390,156 @@ function normalizarAcordesTexto(texto){
 
   }).join("\n");
 }
+
 function crearEditorEstructura(datos={}){
   const c=document.getElementById("estructuraCancion");
   c.innerHTML="";
 
-  SECCIONES.forEach(([k,n])=>{
-    const d=document.createElement("div");
+  ordenSeccionesActual=ordenSeccionesActual.filter(
+    k=>SECCIONES.some(([id])=>id===k)
+  );
 
-    d.className="section-card section-"+k;
+  SECCIONES.forEach(([k])=>{
+    if(!ordenSeccionesActual.includes(k))
+      ordenSeccionesActual.push(k);
+  });
 
-    d.innerHTML=`
-      <div class="section-head">
-        <label><b>🎵 ${n}</b></label>
-        <button type="button"
-          class="insert-separator"
-          title="Insertar | en la posición del cursor">|</button>
-      </div>
-      <textarea id="sec_${k}"
-        class="campoSeccion"
-        rows="4"
-        placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;
-
-    c.appendChild(d);
-
-    const textarea=d.querySelector("textarea");
-    const boton=d.querySelector(".insert-separator");
-
-    function ajustarAltura(){
-      textarea.style.height="auto";
-      textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";
-    }
-
-    textarea.addEventListener("input",ajustarAltura);
-
-    textarea.addEventListener("blur",function(){
-      this.value=normalizarAcordesTexto(this.value);
-      ajustarAltura();
+  function guardarTextosActuales(){
+    ordenSeccionesActual.forEach(k=>{
+      const ta=document.getElementById("sec_"+k);
+      if(ta)datos[k]=ta.value;
     });
+  }
 
-    ajustarAltura();
+  function render(){
+    guardarTextosActuales();
+    c.innerHTML="";
 
-    boton.addEventListener("click",function(){
-      textarea.focus();
+    ordenSeccionesActual.forEach((k,pos)=>{
+      const [,n]=SECCIONES.find(([id])=>id===k);
 
-      const inicio=textarea.selectionStart??textarea.value.length;
-      const fin=textarea.selectionEnd??inicio;
-      const antes=textarea.value.slice(0,inicio);
-      const despues=textarea.value.slice(fin);
+      const d=document.createElement("div");
+      d.className="section-card section-"+k;
 
-      let separador=" | ";
+      d.innerHTML=`
+        <div class="section-head">
+          <label><b>🎵 ${n}</b></label>
 
-      if(/(?:^|\s)\|\s*$/.test(antes)||/^\s*\|(?:\s|$)/.test(despues)){
-        separador="|";
+          <div class="section-order-buttons">
+            <button type="button"
+              class="move-up"
+              title="Mover arriba"
+              ${pos===0?"disabled":""}>↑</button>
+
+            <button type="button"
+              class="move-down"
+              title="Mover abajo"
+              ${pos===ordenSeccionesActual.length-1?"disabled":""}>↓</button>
+
+            <button type="button"
+              class="insert-separator"
+              title="Insertar separador">|</button>
+          </div>
+        </div>
+
+        <textarea id="sec_${k}"
+          class="campoSeccion"
+          rows="4"
+          placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(datos[k]||"")}</textarea>
+      `;
+
+      c.appendChild(d);
+
+      const textarea=d.querySelector("textarea");
+      const boton=d.querySelector(".insert-separator");
+
+      function ajustarAltura(){
+        textarea.style.height="auto";
+        textarea.style.height=Math.max(
+          100,
+          textarea.scrollHeight
+        )+"px";
       }
 
-      textarea.setRangeText(separador,inicio,fin,"end");
+      textarea.addEventListener("input",ajustarAltura);
 
-      textarea.dispatchEvent(new Event("input",{bubbles:true}));
-      textarea.dispatchEvent(new Event("change",{bubbles:true}));
-      textarea.focus();
+      textarea.addEventListener("blur",function(){
+        this.value=normalizarAcordesTexto(this.value);
+        datos[k]=this.value;
+        ajustarAltura();
+      });
+
+      ajustarAltura();
+
+      boton.addEventListener("click",function(){
+        textarea.focus();
+
+        const inicio=textarea.selectionStart??textarea.value.length;
+        const fin=textarea.selectionEnd??inicio;
+
+        const antes=textarea.value.slice(0,inicio);
+        const despues=textarea.value.slice(fin);
+
+        let separador=" | ";
+
+        if(
+          /(?:^|\s)\|\s*$/.test(antes)||
+          /^\s*\|(?:\s|$)/.test(despues)
+        ){
+          separador="|";
+        }
+
+        textarea.setRangeText(
+          separador,
+          inicio,
+          fin,
+          "end"
+        );
+
+        textarea.dispatchEvent(
+          new Event("input",{bubbles:true})
+        );
+
+        textarea.focus();
+      });
+
+      d.querySelector(".move-up").addEventListener("click",()=>{
+        if(pos>0){
+          guardarTextosActuales();
+
+          [
+            ordenSeccionesActual[pos-1],
+            ordenSeccionesActual[pos]
+          ]=[
+            ordenSeccionesActual[pos],
+            ordenSeccionesActual[pos-1]
+          ];
+
+          render();
+        }
+      });
+
+      d.querySelector(".move-down").addEventListener("click",()=>{
+        if(pos<ordenSeccionesActual.length-1){
+          guardarTextosActuales();
+
+          [
+            ordenSeccionesActual[pos+1],
+            ordenSeccionesActual[pos]
+          ]=[
+            ordenSeccionesActual[pos],
+            ordenSeccionesActual[pos+1]
+          ];
+
+          render();
+        }
+      });
     });
-  });
   }
+
+  render();
+}
+
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
 function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
