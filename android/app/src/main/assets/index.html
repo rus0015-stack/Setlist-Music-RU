@@ -322,8 +322,55 @@ function abrir(n){
   if(n==="canciones")mostrarCanciones();else if(n==="letras")mostrarLetras();else if(n==="charts")mostrarCharts();else if(n==="setlist")mostrarSetlist();else if(n==="referencias")mostrarReferencias();
   return true;
 }
+function normalizarNota(n){return EQUIVALENCIAS[n]||n}
 function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
-function normalizarAcordesTexto(texto){if(!texto)return "";const patron=/(^|[\s|([\{,:;])([a-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?=$|[\s|)\]\},:;.])/g;return String(texto).replace(patron,(m,a,n,al,q)=>a+n.toUpperCase()+(al||"")+(q||""))}
+function normalizarAcordesTexto(texto){
+  if(!texto)return "";
+
+  const acorde=/^([A-Ga-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-Ga-g])([#b]?))?$/;
+
+  return String(texto).split(/\r?\n/).map(linea=>{
+    if(!linea.trim())return linea;
+
+    let t=linea.trim()
+      .replace(/[ \t]*[-–—][ \t]*/g," | ")
+      .replace(/[ \t]*\|[ \t]*/g," | ");
+
+    const tokens=t.split(/\s+/).filter(Boolean);
+
+    const convertidos=tokens.map(token=>{
+      if(token==="|")return token;
+
+      const m=token.match(acorde);
+      if(!m)return null;
+
+      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+
+        (m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
+    });
+
+    if(convertidos.every(x=>x!==null)&&
+       convertidos.filter(x=>x!=="|").length>=2){
+
+      const lista=convertidos.filter(x=>x!=="|");
+      return lista.join(" | ");
+    }
+
+    return tokens.map(token=>{
+      if(token==="|")return "|";
+
+      const m=token.match(acorde);
+      if(!m)return token;
+
+      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+
+        (m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
+    }).join(" ")
+      .replace(/\s*\|\s*/g," | ")
+      .replace(/(?:\s*\|\s*)+/g," | ")
+      .replace(/^\s*\|\s*|\s*\|\s*$/g,"")
+      .trim();
+
+  }).join("\n");
+}
 function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card";d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="4" placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");function ajustarAltura(){textarea.style.height="auto";textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";}textarea.addEventListener("input",ajustarAltura);textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value);ajustarAltura()});ajustarAltura();boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\s)\|\s*$/.test(antes)||/^\s*\|(?:\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
 function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
