@@ -642,7 +642,9 @@ function renderEstructuraEnVivo(c){
   if(!partes.length)return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
   return partes.map(([k,n])=>{
     const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
-    return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${esc(texto)}</div></div>`;
+    // Render each stored line explicitly so the live view cannot collapse line breaks.
+    const textoHTML=texto.split(/\r?\n/).map(linea=>esc(linea)).join("<br>");
+    return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${textoHTML}</div></div>`;
   }).join("");
 }
 async function mostrarVistaTocar(tipo){
