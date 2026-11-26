@@ -27,7 +27,12 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .section-label{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:8px;background:var(--card2);color:var(--txt)}
 .live-section{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);border-left:5px solid var(--blue)}
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
-.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.section-card textarea{width:100%;min-height:100px;height:auto;margin:0;padding:10px;font-size:17px;line-height:1.8;white-space:pre-wrap;resize:vertical;overflow-y:hidden}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}
+.section-order-buttons{display:flex;gap:4px;align-items:center}
+.section-order-buttons button{min-width:32px;padding:5px 7px!important;margin:0!important;font-weight:800}
+.section-order-buttons button:disabled{opacity:.35;cursor:not-allowed}
+
+.section-card textarea{width:100%;min-height:100px;height:auto;margin:0;padding:10px;font-size:17px;line-height:1.8;white-space:pre-wrap;resize:vertical;overflow-y:hidden}.setitem{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:13px;margin:7px 0;cursor:grab;transition:.18s ease}.setitem:hover{border-color:var(--blue);transform:translateX(2px)}.setitem .num{width:32px;text-align:center;color:var(--muted);font-weight:700}.checkSetlist{accent-color:var(--blue)}.setitem .main{flex:1;min-width:140px}.setitem .actions{display:flex;gap:5px;flex-wrap:wrap}.setitem.dragging{opacity:.45}.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat div{background:var(--card2);padding:13px;border-radius:12px;text-align:center;border:1px solid var(--line)}.stat b{display:block;font-size:20px}.ref a{color:var(--blue2);word-break:break-all}.kbd{background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
 #visorPDF{
   position:fixed;
   top:0;
@@ -101,8 +106,8 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 #tocar .tocar-contenido-card{padding:7px!important;margin:5px 0 0!important}
 #tocar .tocar-pre{width:100%;min-height:65vh;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:clamp(18px,3vw,28px);line-height:1.55}
 #tocar .live-section{margin:0 0 8px!important;padding:9px 11px!important;border-radius:12px!important}
-#tocar .live-section-label{font-size:13px!important;line-height:1.2!important;margin:0 0 4px!important}
-#tocar .live-chords{font-size:clamp(19px,3vw,25px)!important;line-height:1.4!important}
+#tocar .live-section-label{font-size:16px!important;line-height:1.25!important;margin:0 0 5px!important}
+#tocar .live-chords{font-size:clamp(22px,3.5vw,29px)!important;line-height:1.42!important}
 </style>
 </head>
 <body>
@@ -279,6 +284,7 @@ let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
 let setlist=JSON.parse(localStorage.getItem("setlist")||"[]");
 let config=JSON.parse(localStorage.getItem("setlistConfig")||'{"nombre":"Mi Setlist"}');
 let indiceActual=-1,tonalidadTemporal=null,dragIndex=null;
+let ordenEditorEstructura=SECCIONES.map(([k])=>k);
 
 /* Migración: todas las canciones deben tener un ID estable. */
 let datosMigrados=false;
@@ -335,14 +341,35 @@ function normalizarAcordesTexto(texto){
     }).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
   }).join("\n");
 }
-function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card section-"+k;d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="4" placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");function ajustarAltura(){textarea.style.height="auto";textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";}textarea.addEventListener("input",ajustarAltura);textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value);ajustarAltura()});ajustarAltura();boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\s)\|\s*$/.test(antes)||/^\s*\|(?:\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
+function crearEditorEstructura(datos={},orden=null){
+  const c=document.getElementById("estructuraCancion");c.innerHTML="";
+  const keys=SECCIONES.map(([k])=>k);
+  ordenEditorEstructura=Array.isArray(orden)?orden.filter(k=>keys.includes(k)):keys.slice();
+  keys.forEach(k=>{if(!ordenEditorEstructura.includes(k))ordenEditorEstructura.push(k)});
+  renderEditorEstructura();
+}
+function renderEditorEstructura(){
+  const c=document.getElementById("estructuraCancion");c.innerHTML="";
+  ordenEditorEstructura.forEach((k,idx)=>{
+    const [key,n]=SECCIONES.find(([x])=>x===k)||[k,k.toUpperCase()];
+    const d=document.createElement("div");d.className="section-card section-"+key;d.dataset.sectionKey=key;
+    d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><div class="section-order-buttons"><button type="button" class="order-up" title="Subir sección" aria-label="Subir ${n}" ${idx===0?'disabled':''}>↑</button><button type="button" class="order-down" title="Bajar sección" aria-label="Bajar ${n}" ${idx===ordenEditorEstructura.length-1?'disabled':''}>↓</button><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div></div><textarea id="sec_${key}" class="campoSeccion" rows="4" placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[key]||""))}</textarea>`;
+    c.appendChild(d);
+    const textarea=d.querySelector("textarea"),boton=d.querySelector(".insert-separator");
+    function ajustarAltura(){textarea.style.height="auto";textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";}
+    textarea.addEventListener("input",ajustarAltura);textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value);ajustarAltura()});ajustarAltura();
+    d.querySelector(".order-up").addEventListener("click",()=>moverSeccionEditor(idx,-1));
+    d.querySelector(".order-down").addEventListener("click",()=>moverSeccionEditor(idx,1));
+    boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\s)\|\s*$/.test(antes)||/^\s*\|(?:\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()});
+  });
+}
+function moverSeccionEditor(indice,delta){const destino=indice+delta;if(destino<0||destino>=ordenEditorEstructura.length)return;[ordenEditorEstructura[indice],ordenEditorEstructura[destino]]=[ordenEditorEstructura[destino],ordenEditorEstructura[indice]];const datos=obtenerEstructura();renderEditorEstructura(datos);}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
-function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
+function estructuraAContenido(o,orden=ordenEditorEstructura){return orden.filter(k=>(o[k]||"").trim()).map(k=>{const n=SECCIONES.find(([x])=>x===k)?.[1]||k.toUpperCase();return n+"\n"+o[k].trim()}).join("\n\n")}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
-
-function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
-function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
-function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura()};n.contenido=estructuraAContenido(n.estructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
+function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({},SECCIONES.map(([k])=>k));abrir("editor")}
+function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido),c.ordenEstructura);abrir("editor")}
+function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura(),ordenEstructura:ordenEditorEstructura.slice()};n.contenido=estructuraAContenido(n.estructura,n.ordenEstructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
   n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
   canciones.push(n);
 }else{
@@ -649,7 +676,8 @@ function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj
 function transponerTexto(txt,destino){txt=String(txt||"").replace(/[ \t]*[-–—][ \t]*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
 function renderEstructuraEnVivo(c){
   const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
-  const partes=SECCIONES.filter(([k])=>(estructura[k]||"").trim());
+  const orden=Array.isArray(c.ordenEstructura)?c.ordenEstructura:SECCIONES.map(([k])=>k);
+  const partes=orden.map(k=>SECCIONES.find(([x])=>x===k)).filter(Boolean).filter(([k])=>(estructura[k]||"").trim());
   if(!partes.length)return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
   return partes.map(([k,n])=>{
     const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
