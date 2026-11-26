@@ -348,7 +348,7 @@ function crearEditorEstructura(datos={},orden=null){
   keys.forEach(k=>{if(!ordenEditorEstructura.includes(k))ordenEditorEstructura.push(k)});
   renderEditorEstructura();
 }
-function renderEditorEstructura(){
+function renderEditorEstructura(datos={}){
   const c=document.getElementById("estructuraCancion");c.innerHTML="";
   ordenEditorEstructura.forEach((k,idx)=>{
     const [key,n]=SECCIONES.find(([x])=>x===k)||[k,k.toUpperCase()];
