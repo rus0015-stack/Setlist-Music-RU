@@ -295,6 +295,7 @@ let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
 let setlist=JSON.parse(localStorage.getItem("setlist")||"[]");
 let config=JSON.parse(localStorage.getItem("setlistConfig")||'{"nombre":"Mi Setlist"}');
 let indiceActual=-1,tonalidadTemporal=null,dragIndex=null;
+let origenModoEnVivo="canciones";
 let ordenEditorEstructura=SECCIONES.map(([k])=>k);
 
 /* Migración: todas las canciones deben tener un ID estable. */
@@ -331,17 +332,20 @@ function normalizarAcordesTexto(texto){
   return String(texto).split(/\r?\n/).map(linea=>{
     if(!linea.trim())return linea;
     let t=linea.trim().replace(/[ \t]*[-–—][ \t]*/g," | ").replace(/[ \t]*\|[ \t]*/g," | ");
-    const inicioRepeticion=/^\/\//.test(t), finRepeticion=/\/\/$/.test(t);
-    if(inicioRepeticion)t=t.replace(/^\/\/[ \t]*/,"");
-    if(finRepeticion)t=t.replace(/[ \t]*\/\/$/,"");
+    // Captura todos los pares de barras de repetición, incluso //// o //////.
+    const inicioMatch=t.match(/^(?:\/{2,}[ \t]*)+/),finMatch=t.match(/(?:[ \t]*\/{2,})+$/);
+    const inicioRepeticion=inicioMatch?(inicioMatch[0].match(/\//g)||[]).length:0;
+    const finRepeticion=finMatch?(finMatch[0].match(/\//g)||[]).length:0;
+    if(inicioMatch)t=t.slice(inicioMatch[0].length).replace(/^[ \t]*/,"");
+    if(finMatch)t=t.slice(0,-finMatch[0].length).replace(/[ \t]*$/,"");
     t=t.replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
     const tokens=t.split(/\s+/).filter(x=>x&&x!=="|");
     const convertidos=tokens.map(token=>{const m=token.match(acorde);if(!m)return null;return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"")});
     let resultado;
     if(convertidos.every(x=>x!==null)&&convertidos.length>=2){resultado=convertidos.join(" | ");}
     else resultado=tokens.map((token,i)=>convertidos[i]||token).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
-    if(inicioRepeticion)resultado="// "+resultado;
-    if(finRepeticion)resultado=resultado+" //";
+    if(inicioRepeticion)resultado="/".repeat(inicioRepeticion)+" "+resultado;
+    if(finRepeticion)resultado=resultado+" "+"/".repeat(finRepeticion);
     return resultado.trim();
   }).join("\n");
 }
@@ -649,6 +653,7 @@ function abrirModoEnVivo(i,tipo="cancion") {
       return false;
     }
     const c = canciones[i];
+    origenModoEnVivo = tipo === "letra" ? "letras" : (tipo === "chart" ? "charts" : "canciones");
     indiceActual = i;
     tonalidadTemporal = normalizarNota(c.tonalidad || "C");
     const destino = document.getElementById("tocar");
@@ -744,7 +749,8 @@ function cerrarTocar(){
 
   document.getElementById("liveAudio")?.remove();
   cerrarPDF();
-  volverInicio();
+  const destino=origenModoEnVivo||"canciones";
+  abrir(destino);
 }
 
 function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
