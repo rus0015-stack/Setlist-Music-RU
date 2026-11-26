@@ -542,19 +542,95 @@ function crearEditorEstructura(datos={}){
 }
 
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
-function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
+function estructuraAContenido(o,orden=null){
+  const lista=orden||SECCIONES.map(([k])=>k);
+
+  return lista
+    .map(k=>{
+      const seccion=SECCIONES.find(([id])=>id===k);
+      if(!seccion)return "";
+
+      const texto=(o[k]||"").trim();
+      return texto?seccion[1]+"\n"+texto:"";
+    })
+    .filter(Boolean)
+    .join("\n\n");
+}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
 
 function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
-function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
-function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura()};n.contenido=estructuraAContenido(n.estructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
-  n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-  canciones.push(n);
-}else{
-  n.id=canciones[indiceActual].id || "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-  canciones[indiceActual]=n;
+function editarCancion(i){
+  indiceActual=i;
+  const c=canciones[i];
+
+  document.getElementById("titulo").value=c.titulo||"";
+  document.getElementById("autor").value=c.autor||"";
+  document.getElementById("fuenteUrl").value=c.fuenteUrl||"";
+  document.getElementById("bpm").value=c.bpm||"";
+  document.getElementById("notasCancion").value=c.notas||"";
+  document.getElementById("tonalidad").value=c.tonalidad||"C";
+
+  const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
+
+  const orden=c.ordenEstructura||SECCIONES.map(([k])=>k);
+
+  crearEditorEstructura(estructura,orden);
+
+  abrir("editor");
 }
-guardarDatos();toast("✓ Canción guardada");abrir("canciones")}
+function guardarCancion(){
+  const titulo=document.getElementById("titulo").value.trim();
+
+  if(!titulo){
+    alert("Escribe el nombre de la canción.");
+    return;
+  }
+
+  const anterior=indiceActual>=0?canciones[indiceActual]:{};
+
+  const n={
+    ...anterior,
+    titulo,
+    autor:document.getElementById("autor").value.trim(),
+    fuenteUrl:document.getElementById("fuenteUrl").value.trim(),
+    tonalidad:document.getElementById("tonalidad").value,
+    bpm:document.getElementById("bpm").value?
+      Number(document.getElementById("bpm").value):"",
+    notas:document.getElementById("notasCancion").value,
+
+    estructura:obtenerEstructura(),
+
+    ordenEstructura:[...ordenSeccionesActual]
+  };
+
+  n.contenido=estructuraAContenido(
+    n.estructura,
+    n.ordenEstructura
+  );
+
+  if(n.fuenteUrl){
+    try{
+      new URL(n.fuenteUrl);
+    }catch{
+      alert("El enlace de audio no es válido.");
+      return;
+    }
+  }
+
+  if(indiceActual<0){
+    n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+    canciones.push(n);
+  }else{
+    n.id=canciones[indiceActual].id||
+      "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+
+    canciones[indiceActual]=n;
+  }
+
+  guardarDatos();
+  toast("✓ Canción guardada con su estructura personalizada");
+  abrir("canciones");
+}
 function eliminarCancionActual(){if(indiceActual<0)return;if(!confirm("¿Eliminar esta canción?"))return;const id=canciones[indiceActual].id;setlist=setlist.filter(x=>x!==id);canciones.splice(indiceActual,1);guardarDatos();indiceActual=-1;abrir("canciones")}
 function mostrarCanciones(){const q=(document.getElementById("buscarCancion").value||"").toLowerCase(),l=document.getElementById("listaCanciones");l.innerHTML="";const r=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q)).sort((a,b)=>(a.c.titulo||"").localeCompare(b.c.titulo||"", "es", {sensitivity:"base"}));if(!r.length){l.innerHTML='<div class="card">🎵 No hay canciones.</div>';return}r.forEach(({c,i})=>{l.innerHTML+=`<div class="card"><h3>🎵 ${esc(c.titulo)}</h3><div>${c.autor?`👤 ${esc(c.autor)}<br>`:""}${c.fuenteUrl?`🔗 <a href="${esc(c.fuenteUrl)}" target="_blank" rel="noopener">Audio de referencia</a><br>`:""}Tonalidad: <b>${esc(c.tonalidad||"C")}</b> ${c.bpm?`<span class="badge">${c.bpm} BPM</span>`:""}</div><div class="row"><button class="fit" onclick="editarCancion(${i})">✏ Editar</button><button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button><button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button></div></div>`})}
 
@@ -853,14 +929,34 @@ function transponerNota(n,s){const p=obtenerPosicion(n);return p<0?n:NOTAS[(p+s+
 function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-G](?:#|b)?))?$/);if(!m)return a;return transponerNota(m[1],s)+(m[2]||"")+(m[3]?"/"+transponerNota(m[3],s):"")}
 function transponerTexto(txt,destino){txt=String(txt||"").replace(/[ \t]*[-–—][ \t]*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
 function renderEstructuraEnVivo(c){
-  const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
-  const partes=SECCIONES.filter(([k])=>(estructura[k]||"").trim());
-  if(!partes.length)return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
+  const estructura=c.estructura||
+    contenidoAEstructura(c.contenido||"");
+
+  const orden=c.ordenEstructura||
+    SECCIONES.map(([k])=>k);
+
+  const partes=orden
+    .map(k=>SECCIONES.find(([id])=>id===k))
+    .filter(([k])=>(estructura[k]||"").trim());
+
+  if(!partes.length){
+    return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
+  }
+
   return partes.map(([k,n])=>{
-    const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
-    // Render each stored line explicitly so the live view cannot collapse line breaks.
-    const textoHTML=texto.split(/\r?\n/).map(linea=>esc(linea)).join("<br>");
-    return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${textoHTML}</div></div>`;
+    const texto=transponerTexto(
+      estructura[k].trim(),
+      tonalidadTemporal||c.tonalidad
+    );
+
+    const textoHTML=texto.split(/\r?\n/)
+      .map(linea=>esc(linea))
+      .join("<br>");
+
+    return `<div class="live-section ${k}">
+      <div class="live-section-label">${n}</div>
+      <div class="live-chords">${textoHTML}</div>
+    </div>`;
   }).join("");
 }
 async function mostrarVistaTocar(tipo){
