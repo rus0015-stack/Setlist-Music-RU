@@ -331,25 +331,18 @@ function normalizarAcordesTexto(texto){
   return String(texto).split(/\r?\n/).map(linea=>{
     if(!linea.trim())return linea;
     let t=linea.trim().replace(/[ \t]*[-–—][ \t]*/g," | ").replace(/[ \t]*\|[ \t]*/g," | ");
-    const tokens=t.split(/\s+/).filter(Boolean);
-    const convertidos=tokens.map(token=>{
-      if(token==="|")return token;
-      const m=token.match(acorde);
-      if(!m)return null;
-      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
-    });
-    // Auto-insert bars only when every non-bar token on the line is a chord.
-    if(convertidos.every(x=>x!==null)&&convertidos.filter(x=>x!=="|").length>=2){
-      const lista=convertidos.filter(x=>x!=="|");
-      return lista.join(" | ");
-    }
-    // If a line includes words, leave its structure intact; only normalize chord capitalization.
-    return tokens.map(token=>{
-      if(token==="|")return "|";
-      const m=token.match(acorde);
-      if(!m)return token;
-      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
-    }).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
+    const inicioRepeticion=/^\/\//.test(t), finRepeticion=/\/\/$/.test(t);
+    if(inicioRepeticion)t=t.replace(/^\/\/[ \t]*/,"");
+    if(finRepeticion)t=t.replace(/[ \t]*\/\/$/,"");
+    t=t.replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
+    const tokens=t.split(/\s+/).filter(x=>x&&x!=="|");
+    const convertidos=tokens.map(token=>{const m=token.match(acorde);if(!m)return null;return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"")});
+    let resultado;
+    if(convertidos.every(x=>x!==null)&&convertidos.length>=2){resultado=convertidos.join(" | ");}
+    else resultado=tokens.map((token,i)=>convertidos[i]||token).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
+    if(inicioRepeticion)resultado="// "+resultado;
+    if(finRepeticion)resultado=resultado+" //";
+    return resultado.trim();
   }).join("\n");
 }
 function crearEditorEstructura(datos={},orden=null){
@@ -357,7 +350,7 @@ function crearEditorEstructura(datos={},orden=null){
   const keys=SECCIONES.map(([k])=>k);
   ordenEditorEstructura=Array.isArray(orden)?orden.filter(k=>keys.includes(k)):keys.slice();
   keys.forEach(k=>{if(!ordenEditorEstructura.includes(k))ordenEditorEstructura.push(k)});
-  renderEditorEstructura();
+  renderEditorEstructura(datos);
 }
 function renderEditorEstructura(datos={}){
   const c=document.getElementById("estructuraCancion");c.innerHTML="";
@@ -377,9 +370,19 @@ function renderEditorEstructura(datos={}){
 function moverSeccionEditor(indice,delta){const destino=indice+delta;if(destino<0||destino>=ordenEditorEstructura.length)return;[ordenEditorEstructura[indice],ordenEditorEstructura[destino]]=[ordenEditorEstructura[destino],ordenEditorEstructura[indice]];const datos=obtenerEstructura();renderEditorEstructura(datos);}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
 function estructuraAContenido(o,orden=ordenEditorEstructura){return orden.filter(k=>(o[k]||"").trim()).map(k=>{const n=SECCIONES.find(([x])=>x===k)?.[1]||k.toUpperCase();return n+"\n"+o[k].trim()}).join("\n\n")}
-function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
+function normalizarNombreSeccion(nombre){return String(nombre||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[📝🎵🎶:._-]/g," ").replace(/\s+/g," ").trim();}
+function claveSeccion(nombre){const n=normalizarNombreSeccion(nombre);const alias={"INTRO":"intro","INTRODUCCION":"intro","VERSO":"verso","ESTROFA":"verso","PRECORO":"precoro","PRE CORO":"precoro","PRE CHORUS":"precoro","CORO":"coro","CHORUS":"coro","ESTRIBILLO":"coro","INSTRUMENTAL":"instrumental","INTERLUDIO":"instrumental","PUENTE":"puente","BRIDGE":"puente","SOLO":"solo","FINAL":"final","CIERRE":"final","OUTRO":"final"};return alias[n]||null}
+function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim();const encabezado=t.replace(/:$/,""),k=claveSeccion(encabezado);if(k){actual=k;return;}if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
+function estructuraCancionParaEditor(c){const salida={};SECCIONES.forEach(([k])=>salida[k]="");const raw=c?.estructura;
+  if(raw&&typeof raw==="object"&&!Array.isArray(raw))Object.entries(raw).forEach(([key,val])=>{const k=claveSeccion(key)|| (SECCIONES.some(([x])=>x===key)?key:null);if(k&&typeof val==="string"&&val.trim())salida[k]=val;});
+  const tieneEstructura=SECCIONES.some(([k])=>(salida[k]||"").trim());
+  if(!tieneEstructura&&c?.contenido){const desdeContenido=contenidoAEstructura(c.contenido);SECCIONES.forEach(([k])=>{if(desdeContenido[k])salida[k]=desdeContenido[k]});}
+  // Formatos de backup antiguos que guardaban la estructura como texto en lugar de objeto.
+  if(!SECCIONES.some(([k])=>(salida[k]||"").trim())&&typeof raw==="string"){const desdeContenido=contenidoAEstructura(raw);SECCIONES.forEach(([k])=>{if(desdeContenido[k])salida[k]=desdeContenido[k]});}
+  return salida;
+}
 function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({},SECCIONES.map(([k])=>k));abrir("editor")}
-function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido),c.ordenEstructura);abrir("editor")}
+function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(estructuraCancionParaEditor(c),c.ordenEstructura);abrir("editor")}
 function guardarCancion(){const titulo=document.getElementById("titulo").value.trim().toLocaleUpperCase("es");if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim().toLocaleUpperCase("es"),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura(),ordenEstructura:ordenEditorEstructura.slice()};n.contenido=estructuraAContenido(n.estructura,n.ordenEstructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
   n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
   canciones.push(n);
@@ -746,7 +749,7 @@ function cerrarTocar(){
 
 function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
 function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones;setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
+function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones.map(c=>{const e=estructuraCancionParaEditor(c);const tiene=SECCIONES.some(([k])=>(e[k]||"").trim());if(tiene){c.estructura=e;if(!c.contenido)c.contenido=estructuraAContenido(e,Array.isArray(c.ordenEstructura)?c.ordenEstructura:SECCIONES.map(([k])=>k));}return c;});setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
 function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
 
 window.addEventListener("beforeunload",()=>guardarDatos());
