@@ -332,6 +332,9 @@ function normalizarAcordesTexto(texto){
   return String(texto).split(/\r?\n/).map(linea=>{
     if(!linea.trim())return linea;
     let t=linea.trim().replace(/[ \t]*[-–—][ \t]*/g," | ").replace(/[ \t]*\|[ \t]*/g," | ");
+    // Marca la barra de compás inmediatamente después de un cierre de repetición,
+    // para retirarla luego y conservar una separación de dos espacios.
+    t=t.replace(/(\/{2,})\s*\|\s*/g,"$1 __REPSEP__ ");
     // Captura todos los pares de barras de repetición, incluso //// o //////.
     const inicioMatch=t.match(/^(?:\/{2,}[ \t]*)+/),finMatch=t.match(/(?:[ \t]*\/{2,})+$/);
     const inicioRepeticion=inicioMatch?(inicioMatch[0].match(/\//g)||[]).length:0;
@@ -339,14 +342,20 @@ function normalizarAcordesTexto(texto){
     if(inicioMatch)t=t.slice(inicioMatch[0].length).replace(/^[ \t]*/,"");
     if(finMatch)t=t.slice(0,-finMatch[0].length).replace(/[ \t]*$/,"");
     t=t.replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
-    const tokens=t.split(/\s+/).filter(x=>x&&x!=="|");
+    // Protege las barras entre acordes para que no se pierdan al convertir tokens.
+    t=t.replace(/\|/g," __BAR__ ");
+    const tokens=t.split(/\s+/).filter(Boolean);
     const convertidos=tokens.map(token=>{const m=token.match(acorde);if(!m)return null;return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"")});
     let resultado;
     if(convertidos.every(x=>x!==null)&&convertidos.length>=2){resultado=convertidos.join(" | ");}
     else resultado=tokens.map((token,i)=>convertidos[i]||token).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
     if(inicioRepeticion)resultado="/".repeat(inicioRepeticion)+" "+resultado;
     if(finRepeticion)resultado=resultado+" "+"/".repeat(finRepeticion);
-    return resultado.trim();
+    resultado=resultado.replace(/__BAR__/g,"|");
+    // Al cerrar una repetición, elimina el compás inmediatamente siguiente y deja
+    // una separación visual (dos espacios) antes del acorde que continúa.
+    resultado=resultado.replace(/(\/{2,})\s*__REPSEP__\s*/g,"$1  ");
+    return resultado.replace(/\s*\|\s*/g," | ").replace(/\s{3,}/g,"  ").trim();
   }).join("\n");
 }
 function crearEditorEstructura(datos={},orden=null){
