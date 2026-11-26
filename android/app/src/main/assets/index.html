@@ -23,25 +23,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.tabs button{font-size:12px;padding:10px 5px;margin:0}.tocar-pre{white-space:pre-wrap;font-size:22px;line-height:1.65;margin:0;color:var(--txt)}pre{color:var(--txt)}.tono{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px}.tono button{margin:0}.tono .center{background:var(--green)}
 .editor-actions{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom, 0px));z-index:15;display:flex;gap:10px;align-items:center;justify-content:center;padding:10px;margin:14px 0 8px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel) 94%,transparent);backdrop-filter:blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.22)}.editor-actions button{margin:0;min-width:130px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.section-head label{margin:0}.insert-separator{width:34px;height:30px;padding:0;margin:0;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--txt);font-size:18px;font-weight:900;line-height:1;cursor:pointer}.insert-separator:hover{border-color:var(--blue);transform:translateY(-1px)}.section-card{padding:10px 12px;margin:6px 0;border-radius:11px;background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--blue)}
 .section-card.section-intro{border-left-color:#3b82f6}.section-card.section-verso{border-left-color:#22c55e}.section-card.section-precoro{border-left-color:#eab308}.section-card.section-coro{border-left-color:#ef4444}.section-card.section-instrumental{border-left-color:#a855f7}.section-card.section-puente{border-left-color:#f97316}.section-card.section-solo{border-left-color:#ec4899}.section-card.section-final{border-left-color:#14b8a6}
-/* COLOR DEL TITULO Y LINEA DE CADA SECCION */
-.section-card.section-intro .section-head label{color:#3b82f6}
-.section-card.section-verso .section-head label{color:#22c55e}
-.section-card.section-precoro .section-head label{color:#eab308}
-.section-card.section-coro .section-head label{color:#ef4444}
-.section-card.section-instrumental .section-head label{color:#a855f7}
-.section-card.section-puente .section-head label{color:#f97316}
-.section-card.section-solo .section-head label{color:#ec4899}
-.section-card.section-final .section-head label{color:#14b8a6}
-
-/* TITULOS EN MODO EN VIVO */
-.live-section.intro .live-section-label{color:#3b82f6}
-.live-section.verso .live-section-label{color:#22c55e}
-.live-section.precoro .live-section-label{color:#eab308}
-.live-section.coro .live-section-label{color:#ef4444}
-.live-section.instrumental .live-section-label{color:#a855f7}
-.live-section.puente .live-section-label{color:#f97316}
-.live-section.solo .live-section-label{color:#ec4899}
-.live-section.final .live-section-label{color:#14b8a6}
+.section-card.section-intro .section-head label,.live-section.intro .live-section-label{color:#3b82f6}.section-card.section-verso .section-head label,.live-section.verso .live-section-label{color:#22c55e}.section-card.section-precoro .section-head label,.live-section.precoro .live-section-label{color:#eab308}.section-card.section-coro .section-head label,.live-section.coro .live-section-label{color:#ef4444}.section-card.section-instrumental .section-head label,.live-section.instrumental .live-section-label{color:#a855f7}.section-card.section-puente .section-head label,.live-section.puente .live-section-label{color:#f97316}.section-card.section-solo .section-head label,.live-section.solo .live-section-label{color:#ec4899}.section-card.section-final .section-head label,.live-section.final .live-section-label{color:#14b8a6}
 .section-label{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:8px;background:var(--card2);color:var(--txt)}
 .live-section{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);border-left:5px solid var(--blue)}
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
@@ -107,236 +89,40 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .chart-section{font-size:11px;font-weight:900;letter-spacing:.5px;color:#3452a4;margin:12px 0 4px;text-transform:uppercase}
 .chart-empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 @media(max-width:650px){.chart-measures{grid-template-columns:repeat(2,minmax(115px,1fr));min-width:0}.chart-sheet{padding:12px}}
-/* MODO EN VIVO: máximo espacio para canción y letra */
-#tocar {
-  padding-bottom: 10px;
-}
-
-#tocar .tocar-contenido-card {
-  padding: 10px;
-  margin-top: 8px;
-}
-
+/* MODO EN VIVO: espacio optimizado */
+#tocar { padding-bottom: 5px; }
+#tocar .tocar-contenido-card { padding: 3px; margin: 3px 0; }
 #tocar .tocar-pre {
-  width: 100%;
-  min-height: 65vh;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  margin: 0;
-  font-size: clamp(18px, 3vw, 28px);
-  line-height: 1.65;
+  width: 100%; min-height: 0; height: auto;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  margin: 0; font-size: clamp(18px, 3vw, 28px); line-height: 1.2;
 }
+#tocar .tabs { display:flex; gap:5px; margin:5px 0; }
+#tocar .tabs button { flex:1; min-width:0; padding:8px 4px; }
 
-#tocar .tabs {
-  display: flex;
-  gap: 6px;
-  margin: 8px 0;
+/* SETLIST: secciones ultra compactas */
+#tocar .live-section {
+  display:block; box-sizing:border-box; height:auto; min-height:0; max-height:none;
+  padding:1px 4px 1px 6px; margin:0 0 1px 0;
+  border-radius:6px; overflow:visible;
 }
-
-#tocar .tabs button {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 5px;
+#tocar .live-section-label {
+  display:block; height:auto; min-height:0; margin:0; padding:0;
+  line-height:1; font-size:11px; letter-spacing:0;
 }
-
-/* =====================================
-   SETLIST MUSIC - VISTA COMPACTA
-   EDITOR Y MODO DIRECTO
-===================================== */
-
-/* MODO DIRECTO: quitar altura vacía */
-#tocar .tocar-contenido-card{
-  padding:5px;
-  margin:5px 0;
+#tocar .live-chords {
+  display:block; height:auto; min-height:0; max-height:none;
+  margin:0; padding:0; line-height:1.08; font-size:20px;
+  font-weight:600; white-space:pre-wrap; overflow:visible; overflow-wrap:anywhere;
 }
-
-#tocar .tocar-pre{
-  min-height:0 !important;
-  height:auto !important;
-  padding:0;
-  margin:0;
-  line-height:1.15;
-}
-
-/* TARJETAS DE INTRO, VERSO, CORO, ETC. */
-#tocar .live-section{
-  margin:0 0 6px;
-  padding:6px 9px;
-  border-radius:10px;
-  border-left-width:4px;
-}
-
-/* TITULOS */
-#tocar .live-section-label{
-  font-size:13px;
-  margin:0 0 3px;
-  line-height:1.2;
-}
-
-/* ACORDES */
-#tocar .live-chords{
-  font-size:20px;
-  line-height:1.25;
-  font-weight:600;
-  white-space:pre-wrap;
-  margin:0;
-}
-
-/* EDITOR DE ESTRUCTURA */
-.section-card{
-  padding:5px 8px;
-  margin:4px 0;
-  border-radius:9px;
-}
-
-.section-head{
-  margin-bottom:3px;
-  min-height:27px;
-}
-
-.section-card textarea{
-  min-height:48px;
-  padding:5px 7px;
-  margin:0;
-  font-size:16px;
-  line-height:1.3;
-}
-
-/* BOTONES DE ORDEN Y SEPARADOR */
-.section-order-buttons{
-  display:flex;
-  align-items:center;
-  gap:3px;
-}
-
-.section-order-buttons button{
-  min-width:30px;
-  height:29px;
-  padding:2px 6px;
-  margin:0;
-  font-size:15px;
-}
-
-/* CONSERVAR OPCIONES Y CONTROLES */
-#tocar .tono{
-  margin:5px 0;
-  gap:5px;
-}
-
-#tocar .tabs{
-  margin:5px 0;
-  gap:5px;
-}
-
-#tocar .tabs button{
-  padding:8px 4px;
-}
-
-/* TITULO Y ACORDES CASI JUNTOS */
-#tocar .live-section{
-  padding-top:5px !important;
-  padding-bottom:5px !important;
-  padding-left:10px !important;
-  padding-right:8px !important;
-}
-
-#tocar .live-section-label{
-  margin-top:0 !important;
-  margin-bottom:0 !important;
-  padding:0 !important;
-  line-height:1 !important;
-  height:auto !important;
-  min-height:0 !important;
-}
-
-#tocar .live-chords{
-  margin-top:0 !important;
-  padding-top:0 !important;
-  line-height:1.15 !important;
-  height:auto !important;
-  min-height:0 !important;
-}
-
-#tocar .live-section-label + .live-chords{
-  margin-top:0 !important;
-}
-
-/* MENOS ESPACIO ENTRE SECCIONES */
-#tocar .live-section{
-  margin-bottom:3px !important;
-}
-/* ===== COMPACTACION EXTREMA DE SECCIONES ===== */
-
-/* TARJETA: BORDE Y CONTENIDO MUY JUNTOS */
-#tocar .live-section{
-  display:block !important;
-  box-sizing:border-box !important;
-
-  padding:2px 5px 2px 7px !important;
-  margin:0 0 2px 0 !important;
-
-  height:auto !important;
-  min-height:0 !important;
-
-  border-radius:7px !important;
-}
-
-/* TITULO: PEGADO AL BORDE SUPERIOR */
-#tocar .live-section-label{
-  display:block !important;
-
-  margin:0 !important;
-  padding:0 !important;
-
-  height:auto !important;
-  min-height:0 !important;
-
-  line-height:1 !important;
-  font-size:12px !important;
-  letter-spacing:0 !important;
-}
-
-/* ACORDES: PEGADOS INMEDIATAMENTE AL TITULO */
-#tocar .live-chords{
-  display:block !important;
-
-  margin:0 !important;
-  padding:0 !important;
-
-  height:auto !important;
-  min-height:0 !important;
-
-  line-height:1.08 !important;
-  font-size:20px !important;
-  font-weight:600 !important;
-
-  white-space:pre-wrap !important;
-  overflow-wrap:anywhere !important;
-}
-
-/* QUITAR ESPACIO EXTRA ENTRE TITULO Y ACORDES */
-#tocar .live-section-label + .live-chords{
-  margin-top:0 !important;
-  padding-top:0 !important;
-}
-
-/* CONTENEDOR DE TODAS LAS SECCIONES */
-#tocar .tocar-contenido-card{
-  padding:2px !important;
-  margin:2px 0 !important;
-}
-
-/* REDUCIR SEPARACION ENTRE TODAS LAS PARTES */
-#tocar .live-section + .live-section{
-  margin-top:0 !important;
-}
-
-/* QUITAR ALTURAS MINIMAS HEREDADAS */
-#tocar .live-section,
-#tocar .live-section-label,
-#tocar .live-chords{
-  flex:none !important;
-}
+#tocar .live-section-label + .live-chords { margin:0; padding:0; }
+#tocar .live-section + .live-section { margin-top:0; }
+#tocar .tocar-contenido-card { padding:2px; margin:2px 0; }
+#tocar .tocar-pre { min-height:0; height:auto; line-height:1.08; }
+/* CONSERVAR CONTROLES DE TONO Y PESTAÑAS */
+#tocar .tono { margin:5px 0; gap:5px; }
+#tocar .tabs { display:flex; gap:5px; margin:5px 0; }
+#tocar .tabs button { flex:1; min-width:0; padding:8px 4px; }
 </style>
 </head>
 <body>
@@ -507,7 +293,6 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.se
 applyTheme();
 if(window.matchMedia){window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if((localStorage.getItem("setlistTheme")||"auto")==="auto")applyTheme()})}
 const SECCIONES=[["intro","INTRO"],["verso","VERSO"],["precoro","PRECORO"],["coro","CORO"],["instrumental","INSTRUMENTAL"],["puente","PUENTE"],["solo","SOLO"],["final","FINAL"]];
-let ordenSeccionesActual=SECCIONES.map(([k])=>k);  
 const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const EQUIVALENCIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
 let canciones=JSON.parse(localStorage.getItem("canciones")||"[]");
@@ -545,291 +330,46 @@ function normalizarNota(n){return EQUIVALENCIAS[n]||n}
 function obtenerPosicion(n){return NOTAS.indexOf(normalizarNota(n))}
 function normalizarAcordesTexto(texto){
   if(!texto)return "";
-
   const acorde=/^([A-Ga-g])([#b]?)(maj7|maj9|maj|m7|m9|m|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-Ga-g])([#b]?))?$/;
-
   return String(texto).split(/\r?\n/).map(linea=>{
     if(!linea.trim())return linea;
-
-    let t=linea.trim()
-      .replace(/[ \t]*[-–—][ \t]*/g," | ")
-      .replace(/[ \t]*\|[ \t]*/g," | ");
-
+    let t=linea.trim().replace(/[ \t]*[-–—][ \t]*/g," | ").replace(/[ \t]*\|[ \t]*/g," | ");
     const tokens=t.split(/\s+/).filter(Boolean);
-
     const convertidos=tokens.map(token=>{
       if(token==="|")return token;
-
       const m=token.match(acorde);
       if(!m)return null;
-
-      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+
-        (m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
+      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
     });
-
-    if(convertidos.every(x=>x!==null)&&
-       convertidos.filter(x=>x!=="|").length>=2){
-
+    // Auto-insert bars only when every non-bar token on the line is a chord.
+    if(convertidos.every(x=>x!==null)&&convertidos.filter(x=>x!=="|").length>=2){
       const lista=convertidos.filter(x=>x!=="|");
       return lista.join(" | ");
     }
-
+    // If a line includes words, leave its structure intact; only normalize chord capitalization.
     return tokens.map(token=>{
       if(token==="|")return "|";
-
       const m=token.match(acorde);
       if(!m)return token;
-
-      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+
-        (m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
-    }).join(" ")
-      .replace(/\s*\|\s*/g," | ")
-      .replace(/(?:\s*\|\s*)+/g," | ")
-      .replace(/^\s*\|\s*|\s*\|\s*$/g,"")
-      .trim();
-
+      return m[1].toUpperCase()+(m[2]||"")+(m[3]||"")+(m[4]?"/"+m[4].toUpperCase()+(m[5]||""):"");
+    }).join(" ").replace(/\s*\|\s*/g," | ").replace(/(?:\s*\|\s*)+/g," | ").replace(/^\s*\|\s*|\s*\|\s*$/g,"").trim();
   }).join("\n");
 }
-
-function crearEditorEstructura(datos={}){
-  const c=document.getElementById("estructuraCancion");
-  c.innerHTML="";
-
-  ordenSeccionesActual=ordenSeccionesActual.filter(
-    k=>SECCIONES.some(([id])=>id===k)
-  );
-
-  SECCIONES.forEach(([k])=>{
-    if(!ordenSeccionesActual.includes(k))
-      ordenSeccionesActual.push(k);
-  });
-
-  function guardarTextosActuales(){
-    ordenSeccionesActual.forEach(k=>{
-      const ta=document.getElementById("sec_"+k);
-      if(ta)datos[k]=ta.value;
-    });
-  }
-
-  function render(){
-    guardarTextosActuales();
-    c.innerHTML="";
-
-    ordenSeccionesActual.forEach((k,pos)=>{
-      const [,n]=SECCIONES.find(([id])=>id===k);
-
-      const d=document.createElement("div");
-      d.className="section-card section-"+k;
-
-      d.innerHTML=`
-        <div class="section-head">
-          <label><b>🎵 ${n}</b></label>
-
-          <div class="section-order-buttons">
-            <button type="button"
-              class="move-up"
-              title="Mover arriba"
-              ${pos===0?"disabled":""}>↑</button>
-
-            <button type="button"
-              class="move-down"
-              title="Mover abajo"
-              ${pos===ordenSeccionesActual.length-1?"disabled":""}>↓</button>
-
-            <button type="button"
-              class="insert-separator"
-              title="Insertar separador">|</button>
-          </div>
-        </div>
-
-        <textarea id="sec_${k}"
-          class="campoSeccion"
-          rows="4"
-          placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(datos[k]||"")}</textarea>
-      `;
-
-      c.appendChild(d);
-
-      const textarea=d.querySelector("textarea");
-      const boton=d.querySelector(".insert-separator");
-
-      function ajustarAltura(){
-        textarea.style.height="auto";
-        textarea.style.height=Math.max(
-          48,
-          textarea.scrollHeight
-        )+"px";
-      }
-
-      textarea.addEventListener("input",ajustarAltura);
-
-      textarea.addEventListener("blur",function(){
-        this.value=normalizarAcordesTexto(this.value);
-        datos[k]=this.value;
-        ajustarAltura();
-      });
-
-      ajustarAltura();
-
-      boton.addEventListener("click",function(){
-        textarea.focus();
-
-        const inicio=textarea.selectionStart??textarea.value.length;
-        const fin=textarea.selectionEnd??inicio;
-
-        const antes=textarea.value.slice(0,inicio);
-        const despues=textarea.value.slice(fin);
-
-        let separador=" | ";
-
-        if(
-          /(?:^|\s)\|\s*$/.test(antes)||
-          /^\s*\|(?:\s|$)/.test(despues)
-        ){
-          separador="|";
-        }
-
-        textarea.setRangeText(
-          separador,
-          inicio,
-          fin,
-          "end"
-        );
-
-        textarea.dispatchEvent(
-          new Event("input",{bubbles:true})
-        );
-
-        textarea.focus();
-      });
-
-      d.querySelector(".move-up").addEventListener("click",()=>{
-        if(pos>0){
-          guardarTextosActuales();
-
-          [
-            ordenSeccionesActual[pos-1],
-            ordenSeccionesActual[pos]
-          ]=[
-            ordenSeccionesActual[pos],
-            ordenSeccionesActual[pos-1]
-          ];
-
-          render();
-        }
-      });
-
-      d.querySelector(".move-down").addEventListener("click",()=>{
-        if(pos<ordenSeccionesActual.length-1){
-          guardarTextosActuales();
-
-          [
-            ordenSeccionesActual[pos+1],
-            ordenSeccionesActual[pos]
-          ]=[
-            ordenSeccionesActual[pos],
-            ordenSeccionesActual[pos+1]
-          ];
-
-          render();
-        }
-      });
-    });
-  }
-
-  render();
-}
-
+function crearEditorEstructura(datos={}){const c=document.getElementById("estructuraCancion");c.innerHTML="";SECCIONES.forEach(([k,n])=>{const d=document.createElement("div");d.className="section-card section-"+k;d.innerHTML=`<div class="section-head"><label><b>🎵 ${n}</b></label><button type="button" class="insert-separator" title="Insertar | en la posición del cursor">|</button></div><textarea id="sec_${k}" class="campoSeccion" rows="4" placeholder="Escribe y organiza los acordes libremente. Enter = nueva línea.">${esc(normalizarAcordesTexto(datos[k]||""))}</textarea>`;c.appendChild(d);const textarea=d.querySelector("textarea");const boton=d.querySelector(".insert-separator");function ajustarAltura(){textarea.style.height="auto";textarea.style.height=Math.max(100,textarea.scrollHeight)+"px";}textarea.addEventListener("input",ajustarAltura);textarea.addEventListener("blur",function(){this.value=normalizarAcordesTexto(this.value);ajustarAltura()});ajustarAltura();boton.addEventListener("click",function(){textarea.focus();const inicio=textarea.selectionStart??textarea.value.length;const fin=textarea.selectionEnd??inicio;const antes=textarea.value.slice(0,inicio);const despues=textarea.value.slice(fin);let separador=" | ";if(/(?:^|\s)\|\s*$/.test(antes)||/^\s*\|(?:\s|$)/.test(despues)){separador="|";}textarea.setRangeText(separador,inicio,fin,"end");textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}));textarea.focus()})})}
 function obtenerEstructura(){const o={};SECCIONES.forEach(([k])=>o[k]=normalizarAcordesTexto(document.getElementById("sec_"+k)?.value||""));return o}
-function estructuraAContenido(o,orden=null){
-  const lista=orden||SECCIONES.map(([k])=>k);
-
-  return lista
-    .map(k=>{
-      const seccion=SECCIONES.find(([id])=>id===k);
-      if(!seccion)return "";
-
-      const texto=(o[k]||"").trim();
-      return texto?seccion[1]+"\n"+texto:"";
-    })
-    .filter(Boolean)
-    .join("\n\n");
-}
+function estructuraAContenido(o){return SECCIONES.filter(([k])=>(o[k]||"").trim()).map(([k,n])=>n+"\n"+o[k].trim()).join("\n\n")}
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
 
 function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({});abrir("editor")}
-function editarCancion(i){
-  indiceActual=i;
-  const c=canciones[i];
-
-  document.getElementById("titulo").value=c.titulo||"";
-  document.getElementById("autor").value=c.autor||"";
-  document.getElementById("fuenteUrl").value=c.fuenteUrl||"";
-  document.getElementById("bpm").value=c.bpm||"";
-  document.getElementById("notasCancion").value=c.notas||"";
-  document.getElementById("tonalidad").value=c.tonalidad||"C";
-
-  const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
-
-  const orden=c.ordenEstructura||SECCIONES.map(([k])=>k);
-
-  crearEditorEstructura(estructura,orden);
-
-  abrir("editor");
+function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido));abrir("editor")}
+function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura()};n.contenido=estructuraAContenido(n.estructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
+  n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+  canciones.push(n);
+}else{
+  n.id=canciones[indiceActual].id || "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
+  canciones[indiceActual]=n;
 }
-function guardarCancion(){
-  const titulo=document.getElementById("titulo").value.trim();
-
-  if(!titulo){
-    alert("Escribe el nombre de la canción.");
-    return;
-  }
-
-  const anterior=indiceActual>=0?canciones[indiceActual]:{};
-
-  const n={
-    ...anterior,
-    titulo,
-    autor:document.getElementById("autor").value.trim(),
-    fuenteUrl:document.getElementById("fuenteUrl").value.trim(),
-    tonalidad:document.getElementById("tonalidad").value,
-    bpm:document.getElementById("bpm").value?
-      Number(document.getElementById("bpm").value):"",
-    notas:document.getElementById("notasCancion").value,
-
-    estructura:obtenerEstructura(),
-
-    ordenEstructura:[...ordenSeccionesActual]
-  };
-
-  n.contenido=estructuraAContenido(
-    n.estructura,
-    n.ordenEstructura
-  );
-
-  if(n.fuenteUrl){
-    try{
-      new URL(n.fuenteUrl);
-    }catch{
-      alert("El enlace de audio no es válido.");
-      return;
-    }
-  }
-
-  if(indiceActual<0){
-    n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-    canciones.push(n);
-  }else{
-    n.id=canciones[indiceActual].id||
-      "song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
-
-    canciones[indiceActual]=n;
-  }
-
-  guardarDatos();
-  toast("✓ Canción guardada con su estructura personalizada");
-  abrir("canciones");
-}
+guardarDatos();toast("✓ Canción guardada");abrir("canciones")}
 function eliminarCancionActual(){if(indiceActual<0)return;if(!confirm("¿Eliminar esta canción?"))return;const id=canciones[indiceActual].id;setlist=setlist.filter(x=>x!==id);canciones.splice(indiceActual,1);guardarDatos();indiceActual=-1;abrir("canciones")}
 function mostrarCanciones(){const q=(document.getElementById("buscarCancion").value||"").toLowerCase(),l=document.getElementById("listaCanciones");l.innerHTML="";const r=canciones.map((c,i)=>({c,i})).filter(x=>(x.c.titulo||"").toLowerCase().includes(q)).sort((a,b)=>(a.c.titulo||"").localeCompare(b.c.titulo||"", "es", {sensitivity:"base"}));if(!r.length){l.innerHTML='<div class="card">🎵 No hay canciones.</div>';return}r.forEach(({c,i})=>{l.innerHTML+=`<div class="card"><h3>🎵 ${esc(c.titulo)}</h3><div>${c.autor?`👤 ${esc(c.autor)}<br>`:""}${c.fuenteUrl?`🔗 <a href="${esc(c.fuenteUrl)}" target="_blank" rel="noopener">Audio de referencia</a><br>`:""}Tonalidad: <b>${esc(c.tonalidad||"C")}</b> ${c.bpm?`<span class="badge">${c.bpm} BPM</span>`:""}</div><div class="row"><button class="fit" onclick="editarCancion(${i})">✏ Editar</button><button class="fit green" onclick="abrirModoEnVivo(${i},'cancion')">▶ Tocar</button><button class="fit" onclick="agregarCancionSetlist(${i})">＋ Setlist</button></div></div>`})}
 
@@ -1128,34 +668,14 @@ function transponerNota(n,s){const p=obtenerPosicion(n);return p<0?n:NOTAS[(p+s+
 function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-G](?:#|b)?))?$/);if(!m)return a;return transponerNota(m[1],s)+(m[2]||"")+(m[3]?"/"+transponerNota(m[3],s):"")}
 function transponerTexto(txt,destino){txt=String(txt||"").replace(/[ \t]*[-–—][ \t]*/g," | ");const c=canciones[indiceActual];const orig=normalizarNota(c.tonalidad||"C"),o=obtenerPosicion(orig),d=obtenerPosicion(destino);if(o<0||d<0)return txt;const s=d-o;if(!s)return txt;return txt.replace(/(^|[\s|([\{,:;])([A-G](?:#|b)?(?:m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/[A-G](?:#|b)?)?)(?=$|[\s|)\]\},:;.])/gm,(m,a,ac)=>a+transponerAcorde(ac,s))}
 function renderEstructuraEnVivo(c){
-  const estructura=c.estructura||
-    contenidoAEstructura(c.contenido||"");
-
-  const orden=c.ordenEstructura||
-    SECCIONES.map(([k])=>k);
-
-  const partes=orden
-    .map(k=>SECCIONES.find(([id])=>id===k))
-    .filter(([k])=>(estructura[k]||"").trim());
-
-  if(!partes.length){
-    return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
-  }
-
+  const estructura=c.estructura||contenidoAEstructura(c.contenido||"");
+  const partes=SECCIONES.filter(([k])=>(estructura[k]||"").trim());
+  if(!partes.length)return '<div class="live-section"><div class="live-chords">No hay acordes o estructura.</div></div>';
   return partes.map(([k,n])=>{
-    const texto=transponerTexto(
-      estructura[k].trim(),
-      tonalidadTemporal||c.tonalidad
-    );
-
-    const textoHTML=texto.split(/\r?\n/)
-      .map(linea=>esc(linea))
-      .join("<br>");
-
-    return `<div class="live-section ${k}">
-      <div class="live-section-label">${n}</div>
-      <div class="live-chords">${textoHTML}</div>
-    </div>`;
+    const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
+    // Render each stored line explicitly so the live view cannot collapse line breaks.
+    const textoHTML=texto.split(/\r?\n/).map(linea=>esc(linea)).join("<br>");
+    return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${textoHTML}</div></div>`;
   }).join("");
 }
 async function mostrarVistaTocar(tipo){
@@ -1206,3 +726,4 @@ volverInicio();
 </script>
 </body>
 </html>
+
