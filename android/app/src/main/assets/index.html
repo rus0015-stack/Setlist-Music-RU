@@ -108,6 +108,13 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 #tocar .live-section{margin:0 0 8px!important;padding:9px 11px!important;border-radius:12px!important}
 #tocar .live-section-label{font-size:16px!important;line-height:1.25!important;margin:0 0 5px!important}
 #tocar .live-chords{font-size:clamp(22px,3.5vw,29px)!important;line-height:1.42!important}
+
+/* Navegacion rapida de canciones en modo directo */
+#liveSongNav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+#liveSongNav button{flex:1;min-height:46px;font-weight:800;font-size:15px}
+#liveSongCounter{min-width:72px;text-align:center;font-weight:800;color:var(--muted);font-size:14px}
+#liveSongNav button:disabled{opacity:.4;cursor:not-allowed}
+
 </style>
 </head>
 <body>
@@ -236,7 +243,11 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   <button class="secondary" onclick="cerrarTocar()">✕ Salir</button>
 
   <h2 id="tocarTitulo"></h2>
-
+  <div id="liveSongNav" class="hidden" aria-label="Navegación de canciones">
+    <button id="livePrevBtn" class="secondary" onclick="cancionAnterior()">⏮ ANTERIOR</button>
+    <span id="liveSongCounter">—</span>
+    <button id="liveNextBtn" class="green" onclick="cancionSiguiente()">SIGUIENTE ⏭</button>
+  </div>
 
   <div class="tono">
     <button onclick="cambiarTonalidad(-1)">− ½</button>
@@ -647,6 +658,7 @@ function abrirModoEnVivo(i,tipo="cancion") {
     destino.classList.remove("hidden");
     const titulo = document.getElementById("tocarTitulo");
     if (titulo) titulo.textContent = (c.titulo || "Sin título").toLocaleUpperCase("es");
+    actualizarNavegacionSetlistEnVivo();
     actualizarTonalidadUI();
     window.scrollTo(0,0);
     mostrarVistaTocar(tipo);
@@ -700,7 +712,15 @@ function abrirEditorDesdeTocar(){editarCancion(indiceActual)}
 function indiceEnSetlistActual(){
   if(indiceActual<0 || !canciones[indiceActual]) return -1;
   const id=canciones[indiceActual].id;
-  return setlist.indexOf(id);
+  return setlist.findIndex(sid=>String(sid)===String(id));
+}
+function actualizarNavegacionSetlistEnVivo(){
+  const nav=document.getElementById("liveSongNav"),counter=document.getElementById("liveSongCounter"),prev=document.getElementById("livePrevBtn"),next=document.getElementById("liveNextBtn");
+  if(!nav||!counter||!prev||!next)return;
+  const p=indiceEnSetlistActual(),total=setlist.length;
+  if(p<0||total<2){nav.classList.add("hidden");return;}
+  nav.classList.remove("hidden");counter.textContent=`${p+1} de ${total}`;
+  prev.disabled=p<=0;next.disabled=p>=total-1;
 }
 function cancionAnterior(){
   const p=indiceEnSetlistActual();
