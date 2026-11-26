@@ -89,40 +89,20 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .chart-section{font-size:11px;font-weight:900;letter-spacing:.5px;color:#3452a4;margin:12px 0 4px;text-transform:uppercase}
 .chart-empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 @media(max-width:650px){.chart-measures{grid-template-columns:repeat(2,minmax(115px,1fr));min-width:0}.chart-sheet{padding:12px}}
-/* MODO EN VIVO: espacio optimizado */
-#tocar { padding-bottom: 5px; }
-#tocar .tocar-contenido-card { padding: 3px; margin: 3px 0; }
-#tocar .tocar-pre {
-  width: 100%; min-height: 0; height: auto;
-  white-space: pre-wrap; overflow-wrap: anywhere;
-  margin: 0; font-size: clamp(18px, 3vw, 28px); line-height: 1.2;
-}
-#tocar .tabs { display:flex; gap:5px; margin:5px 0; }
-#tocar .tabs button { flex:1; min-width:0; padding:8px 4px; }
-
-/* SETLIST: secciones ultra compactas */
-#tocar .live-section {
-  display:block; box-sizing:border-box; height:auto; min-height:0; max-height:none;
-  padding:1px 4px 1px 6px; margin:0 0 1px 0;
-  border-radius:6px; overflow:visible;
-}
-#tocar .live-section-label {
-  display:block; height:auto; min-height:0; margin:0; padding:0;
-  line-height:1; font-size:11px; letter-spacing:0;
-}
-#tocar .live-chords {
-  display:block; height:auto; min-height:0; max-height:none;
-  margin:0; padding:0; line-height:1.08; font-size:20px;
-  font-weight:600; white-space:pre-wrap; overflow:visible; overflow-wrap:anywhere;
-}
-#tocar .live-section-label + .live-chords { margin:0; padding:0; }
-#tocar .live-section + .live-section { margin-top:0; }
-#tocar .tocar-contenido-card { padding:2px; margin:2px 0; }
-#tocar .tocar-pre { min-height:0; height:auto; line-height:1.08; }
-/* CONSERVAR CONTROLES DE TONO Y PESTAÑAS */
-#tocar .tono { margin:5px 0; gap:5px; }
-#tocar .tabs { display:flex; gap:5px; margin:5px 0; }
-#tocar .tabs button { flex:1; min-width:0; padding:8px 4px; }
+/* MODO EN VIVO: controles arriba, espacio útil para acordes/estructura */
+#tocar{padding-top:0!important;padding-bottom:6px!important}
+#tocar>button.secondary{margin:0 0 4px!important;padding:7px 10px!important}
+#tocar #tocarTitulo{margin:4px 0 2px!important;font-size:clamp(20px,4.5vw,28px)!important;line-height:1.18!important}
+#tocar #tocarTonalidad{margin:1px 0 4px!important;font-size:14px!important;line-height:1.2!important}
+#tocar .tono{margin:3px 0 5px!important;gap:5px!important}
+#tocar .tono button{margin:0!important;padding:8px 7px!important}
+#tocar .tabs{display:flex;gap:5px;margin:5px 0 6px!important}
+#tocar .tabs button{flex:1;min-width:0;padding:8px 4px!important;margin:0!important;font-size:12px!important}
+#tocar .tocar-contenido-card{padding:7px!important;margin:5px 0 0!important}
+#tocar .tocar-pre{width:100%;min-height:65vh;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:clamp(18px,3vw,28px);line-height:1.55}
+#tocar .live-section{margin:0 0 8px!important;padding:9px 11px!important;border-radius:12px!important}
+#tocar .live-section-label{font-size:13px!important;line-height:1.2!important;margin:0 0 4px!important}
+#tocar .live-chords{font-size:clamp(19px,3vw,25px)!important;line-height:1.4!important}
 </style>
 </head>
 <body>
@@ -726,4 +706,3 @@ volverInicio();
 </script>
 </body>
 </html>
-
