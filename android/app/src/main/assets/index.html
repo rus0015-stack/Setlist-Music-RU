@@ -265,7 +265,78 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 #tocar .live-section{
   margin-bottom:3px !important;
 }
+/* ===== COMPACTACION EXTREMA DE SECCIONES ===== */
 
+/* TARJETA: BORDE Y CONTENIDO MUY JUNTOS */
+#tocar .live-section{
+  display:block !important;
+  box-sizing:border-box !important;
+
+  padding:2px 5px 2px 7px !important;
+  margin:0 0 2px 0 !important;
+
+  height:auto !important;
+  min-height:0 !important;
+
+  border-radius:7px !important;
+}
+
+/* TITULO: PEGADO AL BORDE SUPERIOR */
+#tocar .live-section-label{
+  display:block !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  height:auto !important;
+  min-height:0 !important;
+
+  line-height:1 !important;
+  font-size:12px !important;
+  letter-spacing:0 !important;
+}
+
+/* ACORDES: PEGADOS INMEDIATAMENTE AL TITULO */
+#tocar .live-chords{
+  display:block !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  height:auto !important;
+  min-height:0 !important;
+
+  line-height:1.08 !important;
+  font-size:20px !important;
+  font-weight:600 !important;
+
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+}
+
+/* QUITAR ESPACIO EXTRA ENTRE TITULO Y ACORDES */
+#tocar .live-section-label + .live-chords{
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+
+/* CONTENEDOR DE TODAS LAS SECCIONES */
+#tocar .tocar-contenido-card{
+  padding:2px !important;
+  margin:2px 0 !important;
+}
+
+/* REDUCIR SEPARACION ENTRE TODAS LAS PARTES */
+#tocar .live-section + .live-section{
+  margin-top:0 !important;
+}
+
+/* QUITAR ALTURAS MINIMAS HEREDADAS */
+#tocar .live-section,
+#tocar .live-section-label,
+#tocar .live-chords{
+  flex:none !important;
+}
 </style>
 </head>
 <body>
