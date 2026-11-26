@@ -97,7 +97,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 /* MODO EN VIVO: controles arriba, espacio útil para acordes/estructura */
 #tocar{padding-top:0!important;padding-bottom:6px!important}
 #tocar>button.secondary{margin:0 0 4px!important;padding:7px 10px!important}
-#tocar #tocarTitulo{margin:4px 0 2px!important;font-size:clamp(20px,4.5vw,28px)!important;line-height:1.18!important}
+#tocar #tocarTitulo{margin:4px 0 8px!important;font-size:clamp(22px,4.8vw,30px)!important;line-height:1.18!important;text-align:center!important;text-transform:uppercase!important}
 #tocar #tocarTonalidad{margin:1px 0 4px!important;font-size:14px!important;line-height:1.2!important}
 #tocar .tono{margin:3px 0 5px!important;gap:5px!important}
 #tocar .tono button{margin:0!important;padding:8px 7px!important}
@@ -182,10 +182,10 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 <section id="editor" class="hidden">
   <button class="secondary" onclick="abrir('canciones')">← Volver</button>
   <h2>🎵 Editar canción</h2>
-  <label>Título</label><input id="titulo" placeholder="Nombre de la canción">
+  <label>Título</label><input id="titulo" placeholder="Nombre de la canción" oninput="this.value=this.value.toLocaleUpperCase('es')">
   <label>Tonalidad original</label>
   <select id="tonalidad"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option><option>A#</option><option>B</option></select>
-  <label>Autor / cantante</label><input id="autor" placeholder="Ej.: Barak">
+  <label>Autor / cantante</label><input id="autor" placeholder="Ej.: Barak" oninput="this.value=this.value.toLocaleUpperCase('es')">
   <label>Enlace de audio de referencia (opcional)</label><input id="fuenteUrl" type="url" placeholder="Pega el enlace de YouTube u otra fuente">
   <p class="small">El enlace identifica la versión que deseas trabajar. La app lo guarda como referencia; no analiza automáticamente el audio.</p>
   <label>Tempo (BPM)</label><input id="bpm" type="number" min="1" max="300" placeholder="Ej.: 92">
@@ -236,7 +236,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
   <button class="secondary" onclick="cerrarTocar()">✕ Salir</button>
 
   <h2 id="tocarTitulo"></h2>
-  <h3 id="tocarTonalidad"></h3>
+
 
   <div class="tono">
     <button onclick="cambiarTonalidad(-1)">− ½</button>
@@ -369,7 +369,7 @@ function estructuraAContenido(o,orden=ordenEditorEstructura){return orden.filter
 function contenidoAEstructura(cont){const o={};SECCIONES.forEach(([k])=>o[k]="");let actual=null;const mapa=Object.fromEntries(SECCIONES.map(([k,n])=>[n,k]));(cont||"").split(/\r?\n/).forEach(l=>{const t=l.trim(),k=mapa[t.toUpperCase()];if(k)actual=k;else if(actual)o[actual]+=(o[actual]?"\n":"")+l});return o}
 function nuevaCancion(){indiceActual=-1;["titulo","autor","fuenteUrl","bpm","notasCancion"].forEach(id=>document.getElementById(id).value="");document.getElementById("tonalidad").value="C";crearEditorEstructura({},SECCIONES.map(([k])=>k));abrir("editor")}
 function editarCancion(i){indiceActual=i;const c=canciones[i];document.getElementById("titulo").value=c.titulo||"";document.getElementById("autor").value=c.autor||"";document.getElementById("fuenteUrl").value=c.fuenteUrl||"";document.getElementById("bpm").value=c.bpm||"";document.getElementById("notasCancion").value=c.notas||"";document.getElementById("tonalidad").value=c.tonalidad||"C";crearEditorEstructura(c.estructura||contenidoAEstructura(c.contenido),c.ordenEstructura);abrir("editor")}
-function guardarCancion(){const titulo=document.getElementById("titulo").value.trim();if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim(),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura(),ordenEstructura:ordenEditorEstructura.slice()};n.contenido=estructuraAContenido(n.estructura,n.ordenEstructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
+function guardarCancion(){const titulo=document.getElementById("titulo").value.trim().toLocaleUpperCase("es");if(!titulo){alert("Escribe el nombre de la canción.");return}const anterior=indiceActual>=0?canciones[indiceActual]:{};const n={...anterior,titulo,autor:document.getElementById("autor").value.trim().toLocaleUpperCase("es"),fuenteUrl:document.getElementById("fuenteUrl").value.trim(),tonalidad:document.getElementById("tonalidad").value,bpm:document.getElementById("bpm").value?Number(document.getElementById("bpm").value):"",notas:document.getElementById("notasCancion").value,estructura:obtenerEstructura(),ordenEstructura:ordenEditorEstructura.slice()};n.contenido=estructuraAContenido(n.estructura,n.ordenEstructura);if(n.fuenteUrl){try{new URL(n.fuenteUrl)}catch{alert("El enlace de audio no es válido.");return}}if(indiceActual<0){
   n.id="song_"+Date.now()+"_"+Math.random().toString(36).slice(2,10);
   canciones.push(n);
 }else{
@@ -646,7 +646,7 @@ function abrirModoEnVivo(i,tipo="cancion") {
     ocultarTodo();
     destino.classList.remove("hidden");
     const titulo = document.getElementById("tocarTitulo");
-    if (titulo) titulo.textContent = (c.titulo || "Sin título") + (c.autor ? " — " + c.autor : "");
+    if (titulo) titulo.textContent = (c.titulo || "Sin título").toLocaleUpperCase("es");
     actualizarTonalidadUI();
     window.scrollTo(0,0);
     mostrarVistaTocar(tipo);
@@ -669,7 +669,7 @@ function tocar(i){
 function tocarPorId(id){
   return abrirModoEnVivoPorId(id,"cancion");
 }
-function actualizarTonalidadUI(){const t=normalizarNota(tonalidadTemporal||"C");document.getElementById("tocarTonalidad").textContent="Tonalidad: "+t;document.getElementById("botonTonalidad").textContent="Tonalidad: "+t}
+function actualizarTonalidadUI(){const t=normalizarNota(tonalidadTemporal||"C");const extra=document.getElementById("tocarTonalidad");if(extra)extra.textContent="";document.getElementById("botonTonalidad").textContent="Tonalidad: "+t}
 function cambiarTonalidad(p){if(indiceActual<0)return;const pos=obtenerPosicion(tonalidadTemporal||canciones[indiceActual].tonalidad||"C");tonalidadTemporal=NOTAS[(pos+p+12)%12];actualizarTonalidadUI();mostrarVistaTocar("cancion")}
 function transponerNota(n,s){const p=obtenerPosicion(n);return p<0?n:NOTAS[(p+s+120)%12]}
 function transponerAcorde(a,s){const m=a.match(/^([A-G](?:#|b)?)(m|maj7|maj9|maj|m7|m9|7|sus4|sus2|dim7|dim|aug|add9|add2|6|9)?(?:\/([A-G](?:#|b)?))?$/);if(!m)return a;return transponerNota(m[1],s)+(m[2]||"")+(m[3]?"/"+transponerNota(m[3],s):"")}
