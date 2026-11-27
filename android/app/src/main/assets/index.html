@@ -27,7 +27,7 @@ input,textarea,select{width:100%;padding:12px 13px;margin:6px 0 12px;border-radi
 .section-label{display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:8px;background:var(--card2);color:var(--txt)}
 .live-section{margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);border-left:5px solid var(--blue)}
 .live-section.intro{border-left-color:#3b82f6}.live-section.verso{border-left-color:#22c55e}.live-section.precoro{border-left-color:#eab308}.live-section.coro{border-left-color:#ef4444}.live-section.instrumental{border-left-color:#a855f7}.live-section.puente{border-left-color:#f97316}.live-section.solo{border-left-color:#ec4899}.live-section.final{border-left-color:#14b8a6}
-.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}
+.live-section-label{font-size:14px;font-weight:900;letter-spacing:.5px;margin-bottom:7px}.live-chords{white-space:pre-wrap;font-size:22px;line-height:1.65;color:var(--txt);font-weight:600}.live-chords .repeat-mark{display:inline-block;padding:0 5px;border-radius:5px;background:var(--card);color:var(--muted);font-weight:900;letter-spacing:1px;border:1px solid var(--line)} .live-chords .pass-mark{display:inline-block;padding:0 4px;border-radius:5px;background:var(--card);color:var(--txt);font-weight:900;border:1px solid var(--line)} .live-chords .unison-mark{display:inline-block;padding:2px 6px;border-radius:6px;background:var(--card);color:var(--blue);font-weight:900;border:1px solid var(--line)}
 .section-order-buttons{display:flex;gap:4px;align-items:center}
 .section-order-buttons button{min-width:32px;padding:5px 7px!important;margin:0!important;font-weight:800}
 .section-order-buttons button:disabled{opacity:.35;cursor:not-allowed}
@@ -711,7 +711,7 @@ function renderEstructuraEnVivo(c){
   return partes.map(([k,n])=>{
     const texto=transponerTexto(estructura[k].trim(),tonalidadTemporal||c.tonalidad);
     // Render each stored line explicitly so the live view cannot collapse line breaks.
-    const textoHTML=texto.split(/\r?\n/).map(linea=>esc(linea)).join("<br>");
+    const textoHTML=texto.split(/\r?\n/).map(linea=>esc(linea).replace(/~([^~]+)~/g,`<span class="pass-mark">$1</span>`).replace(/!([^!]+)!/g,`<span class="unison-mark">$1</span>`).replace(/(^|\s)(\/{1,})(?=\s|$)/g, (m, antes, barras)=>antes+`<span class="repeat-mark">${barras}</span>`)).join("<br>");
     return `<div class="live-section ${k}"><div class="live-section-label">${n}</div><div class="live-chords">${textoHTML}</div></div>`;
   }).join("");
 }
