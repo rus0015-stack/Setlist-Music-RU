@@ -762,8 +762,34 @@ function cerrarTocar(){
   abrir(destino);
 }
 
-function exportarDatos(){const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});descargar(blob,"Setlist_Music_backup.json")}
-function descargar(blob,nombre){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nombre;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportarDatos(){
+  try{
+    guardarDatos();
+    const data={version:2,fecha:new Date().toISOString(),canciones,setlist,config};
+    const json=JSON.stringify(data,null,2);
+    const nombre="Setlist_Music_backup.json";
+    // Android WebView: usar el puente nativo que guarda directamente en Descargas.
+    if(window.AndroidPDF&&typeof window.AndroidPDF.exportarJSON==="function"){
+      window.AndroidPDF.exportarJSON(json,nombre);
+      toast("Preparando exportación JSON…");
+      return;
+    }
+    // Navegador/PWA: descarga normal, con enlace temporal insertado en el DOM.
+    const blob=new Blob([json],{type:"application/json;charset=utf-8"});
+    descargar(blob,nombre);
+    toast("Exportación JSON iniciada");
+  }catch(e){
+    console.error("Error al exportar JSON",e);
+    alert("No se pudo exportar la base de datos: "+(e.message||e));
+  }
+}
+function descargar(blob,nombre){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=nombre;a.style.display="none";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
 function importarDatos(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.canciones))throw new Error("Formato");canciones=d.canciones.map(c=>{const e=estructuraCancionParaEditor(c);const tiene=SECCIONES.some(([k])=>(e[k]||"").trim());if(tiene){c.estructura=e;if(!c.contenido)c.contenido=estructuraAContenido(e,Array.isArray(c.ordenEstructura)?c.ordenEstructura:SECCIONES.map(([k])=>k));}return c;});setlist=Array.isArray(d.setlist)?d.setlist:[];config=d.config||{nombre:"Mi Setlist"};guardarDatos();toast("✓ Datos importados");mostrarSetlist()}catch(e){alert("No se pudo importar el archivo JSON.")}};rd.readAsText(f)}
 function borrarBiblioteca(){if(!confirm("Esto eliminará canciones y setlist del navegador. ¿Continuar?"))return;canciones=[];setlist=[];guardarDatos();toast("Biblioteca vaciada");volverInicio()}
 
